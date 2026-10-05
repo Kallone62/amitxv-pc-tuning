@@ -1,0 +1,33 @@
+43e5c08c74541c1faec8611aba48a8ea95d4f45220dff90cc8d11976b1e4a8f9  ./.bios/README.md
+39c4d677c23345a6b42bfc64b0285a13de404018d1659b94d3750cf04b8274ab  ./.bios/current/ROG-B850-I/README.md
+ad8ebb87679469d99bcd0e4ed8a630d72b6488c783a437329e7c5a600e269c8d  ./.bios/legacy/Z690-Tachyon/F29Z690TachyonExperimental.txt
+8fd3103e8d34f82a6741ba4de9dc1b4c9d173e7a797508ac28aa0bc515d216bf  ./.bios/legacy/Z690-Tachyon/F29Z690TachyonSafe.txt
+d3eb21489e1918c71ee0341784f5bb28992a8d000719deed0c7af24954a5bb40  ./.bios/legacy/Z690-Tachyon/README.md
+e8b600be155f85ba417bee80eae6065848885f9e72a331b19d17d53fd9751d38  ./.drivers/Assets/Monitor/XL2566X+_WHQL dirver_V001_Windows_240605180238.7z
+79c8f1c9fc565619049b34b80dc2a7f1ab0d1e56bc3745ce07a6f82145f68099  ./.drivers/Install-Gaming-Drivers-v2-LatestOfficial.ps1
+7675ac668ea6dc32134e8f3095befe673900173cb92ee86f6341ef84e1623181  ./.drivers/README.txt
+8a62467568d96b71b375b934f4681dec19e569ce4c4617d2bb26e596a9c07ff5  ./.drivers/Run_Gaming_Drivers_v2.cmd
+563c6e3e83e45301f39daa2be379193987a679577244dbcc320e899b74572e6b  ./.gitignore
+8c2a21fb1faee391a6924b70ff070ed3ad2e62d12e23cf83883e82e8f84b5fc6  ./.scripts/CS2-GamingOnly-Pro-v1.0.8.ps1
+c9871df1260abeed00a21513b48f034c05fab849e5f38dd636d8928f4f4f1920  ./.scripts/Gaming-Background-Cleanup-v1.ps1
+08611231d4305e6b2dbaa938976bc54b50b40180b974914935471beb77394a4d  ./.scripts/Gaming-Device-Disable-v2.ps1
+86e84618af6f1b9a33559126df18976e456ee9e4099b94d7e1d44b1f609c87c6  ./.scripts/Gaming-Device-Power-Baseline-v1.ps1
+93664b53f8d24559716fb61cecc6e3a2823a634690131b544d3b418557c550cc  ./.scripts/I226V_Baseline_v2.ps1
+ec881e32935cf3d511286e528215343bc5f903914c2efc62ed304cf186352b96  ./.scripts/Install-PostFormat-Apps.ps1
+690b7eab3766d535eb96aef0266cf138091acc7bda0807ca69dce184b4b37c64  ./.scripts/Install-Spotify-Unelevated.ps1
+29b2a05996731ae652007c2d33de6a53e57e3e89d6ee7ab8b3493054647d1bee  ./.scripts/PostFormat-App-Privacy-Capabilities-v1.ps1
+0eba8a8ef2d0e0750bc46d94906ca80ff53aa3dd80369afc67b7411c174bd074  ./.scripts/PostFormat-LowRisk-Background-v1.ps1
+3f4083822afbfab87924cbbbf791d98c31221a55b889883b3af88b0795aabb6c  ./.scripts/PostFormat-Policy-Baseline-v1.ps1
+2c5425f3a4d4c56c8fe0f36993d5c85b952dcb049cde2c5f3f44357950c5898d  ./.scripts/WU-Driver-Scan-v1.ps1
+0b00c9e91788449223f8435382828a5ef9738e158d935d87590b134d3201c794  ./After Game Update/shadercachereset.bat
+1f974890a8c4c494aedf17dbc2982764d4b337a1302ec68f5da8dc5456ea0c29  ./Game/autoexec.cfg
+71d4ba1f348ae0ea2fc4096af0509aacac8fe76e2e21ee60bd7cc512816397e0  ./Keyboard/wootility.io.txt
+88de7c5cf89430bbbd7672d0acb2336539afab69168ef7cab329577a323550f3  ./README.md
+5fbebff6a05b1ae282c477308624781c2486f8134da505c790334562c5c64643  ./REFERENCE_STATE.md
+fb72c0562383f7f1ef5196a2810e3242d75895a4492369801bec5fb018e28c6c  ./Run_CS2_Gaming_Scripts.cmd
+1b6265c9972099ab670f0b0225345d3b1d332faa7f884e9357503d867c7daf6b  ./Run_PostFormat_Apps.cmd
+6ac48d746e360f9f95836df21ef928ee9f3ad58e1f4f5866b3c1260ef1f16aee  ./SYSTEM.md
+12dc9ac781a6ffb03b8a87ba7b4eeff45bef8d261828995a13f16929b158b76a  ./Test_WU_Driver_Scan_Once.cmd
+6ffeffe541704d6b6f1add7a2cabae99a99beea7febafc008c088ec13b2d198f  ./Training/KOVAAKS_CS2_STANDARD_V1.zip
+b6bad52d7d9f4cb8f777d631349bfe34c55f88a80962e3e694aa259681090e0f  ./Training/aimroutine.txt
+8409e085d863103eb191ca2ed7625acf60d7c643a94ce57f57765eec36751f65  ./VALIDATION.md

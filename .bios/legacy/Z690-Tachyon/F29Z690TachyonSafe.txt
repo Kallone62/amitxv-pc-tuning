@@ -1,0 +1,2038 @@
+// Script File Name : nvram.txt
+// Created on 02/27/25 at 20:05:27    
+// AMISCE Utility. Ver 5.05.01.0002
+// Copyright (c) 2021 AMI. All rights reserved.
+
+HIICrc32= E846EA71
+
+
+Setup Question	= PEP CPU
+Help String	= Add CPU in PEP mitigation list
+Token	=255	// Do NOT change this line
+Offset	=6B
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP Graphics
+Help String	= Add Gfx in PEP mitigation list
+Token	=256	// Do NOT change this line
+Offset	=6C
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP IPU
+Help String	= Add IPU in PEP mitigation list
+Token	=257	// Do NOT change this line
+Offset	=78
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP enumerated SATA ports
+Help String	= Add enumerated SATA ports in PEP Constraint list
+Token	=25A	// Do NOT change this line
+Offset	=A0A
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=[00]Disabled	// Move "*" to the desired Option
+         *[01]Enabled
+
+Setup Question	= PEP PCIe Storage
+Help String	= Add PCIe root ports (storage) in PEP mitigation list
+Token	=25B	// Do NOT change this line
+Offset	=891
+Width	=01
+BIOS Default	=[03]D3 
+Options	=*[00]No Constraint	// Move "*" to the desired Option
+         [01]D0/F1
+         [03]D3
+
+Setup Question	= PEP PCIe LAN
+Help String	= Add PCIe root ports (LAN) in PEP mitigation list
+Token	=25C	// Do NOT change this line
+Offset	=ACF
+Width	=01
+BIOS Default	=[01]D0/F1 
+Options	=*[00]No Constraint	// Move "*" to the desired Option
+         [01]D0/F1
+         [03]D3
+
+Setup Question	= PEP PCIe WLAN
+Help String	= 
+Token	=25D	// Do NOT change this line
+Offset	=AD0
+Width	=01
+BIOS Default	=[01]D0/F1 
+Options	=[00]No Constraint	// Move "*" to the desired Option
+         [01]D0/F1
+         *[03]D3
+
+Setup Question	= PEP PCIe GFX
+Help String	= 
+Token	=25E	// Do NOT change this line
+Offset	=AD1
+Width	=01
+BIOS Default	=[01]D0/F1 
+Options	=*[00]No Constraint	// Move "*" to the desired Option
+         [01]D0/F1
+         [03]D3
+
+Setup Question	= PEP UART
+Help String	= Add UART in PEP mitigation list
+Token	=260	// Do NOT change this line
+Offset	=6E
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP I2C0
+Help String	= Adds I2C in PEP mitigation list
+Token	=261	// Do NOT change this line
+Offset	=6F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP I2C1
+Help String	= Adds I2C in PEP mitigation list
+Token	=262	// Do NOT change this line
+Offset	=70
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP I2C2
+Help String	= Adds I2C in PEP mitigation list
+Token	=263	// Do NOT change this line
+Offset	=71
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP I2C3
+Help String	= Adds I2C in PEP mitigation list
+Token	=264	// Do NOT change this line
+Offset	=72
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP SPI
+Help String	= Add SPI in PEP mitigation list
+Token	=269	// Do NOT change this line
+Offset	=75
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP XHCI
+Help String	= Add XHCI in PEP mitigation list
+Token	=26A	// Do NOT change this line
+Offset	=76
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP Audio
+Help String	= Add Audio in PEP mitigation list
+Token	=26B	// Do NOT change this line
+Offset	=77
+Width	=01
+BIOS Default	=[01]D0/F1 
+Options	=[00]No Constraint	// Move "*" to the desired Option
+         [01]D0/F1
+         *[03]D3
+
+Setup Question	= PEP CSME
+Help String	= Add CSME in PEP mitigation list
+Token	=26C	// Do NOT change this line
+Offset	=7A
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP HECI3
+Help String	= Add HECI3 in PEP mitigation list
+Token	=26D	// Do NOT change this line
+Offset	=A0B
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP LAN(GBE)
+Help String	= Add LAN(GBE) in PEP mitigation list
+Token	=26E	// Do NOT change this line
+Offset	=7B
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PEP EMMC
+Help String	= Add EMMC in PEP mitigation list
+Token	=273	// Do NOT change this line
+Offset	=B7D
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+ 
+Setup Question	= RAID0
+Help String	= Enable/Disable RAID0 support
+Token	=BE3	// Do NOT change this line
+Offset	=17F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= RAID1
+Help String	= Enable/Disable RAID1 support
+Token	=BE4	// Do NOT change this line
+Offset	=180
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= RAID5
+Help String	= Enable/Disable RAID5 support
+Token	=BE5	// Do NOT change this line
+Offset	=182
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= RAID10
+Help String	= Enable/Disable RAID10 support
+Token	=BE6	// Do NOT change this line
+Offset	=181
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Intel Rapid Recovery Technology
+Help String	= Enable/Disable Intel Rapid Recovery Technology.
+Token	=BE7	// Do NOT change this line
+Offset	=183
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Intel(R) Optane(TM) Memory
+Help String	= Enable/Disable System Acceleration with Intel(R) Optane(TM) Memory feature.
+Token	=BE9	// Do NOT change this line
+Offset	=185
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #0
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CD3	// Do NOT change this line
+Offset	=38
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #1
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CD4	// Do NOT change this line
+Offset	=39
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #2
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CD5	// Do NOT change this line
+Offset	=3A
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #3
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CD6	// Do NOT change this line
+Offset	=3B
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #4
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CD7	// Do NOT change this line
+Offset	=3C
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #5
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CD8	// Do NOT change this line
+Offset	=3D
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #6
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CD9	// Do NOT change this line
+Offset	=3E
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #7
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CDA	// Do NOT change this line
+Offset	=3F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #8
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CDB	// Do NOT change this line
+Offset	=40
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB SS Physical Connector #9
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CDC	// Do NOT change this line
+Offset	=41
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #0
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CDD	// Do NOT change this line
+Offset	=28
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #1
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CDE	// Do NOT change this line
+Offset	=29
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #2
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CDF	// Do NOT change this line
+Offset	=2A
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[00]Disabled	// Move "*" to the desired Option
+         *[01]Enabled
+
+Setup Question	= USB HS Physical Connector #3
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE0	// Do NOT change this line
+Offset	=2B
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #4
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE1	// Do NOT change this line
+Offset	=2C
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[00]Disabled	// Move "*" to the desired Option
+         *[01]Enabled
+
+Setup Question	= USB HS Physical Connector #5
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE2	// Do NOT change this line
+Offset	=2D
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[00]Disabled	// Move "*" to the desired Option
+         *[01]Enabled
+
+Setup Question	= USB HS Physical Connector #6
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE3	// Do NOT change this line
+Offset	=2E
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #7
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE4	// Do NOT change this line
+Offset	=2F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #8
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE5	// Do NOT change this line
+Offset	=30
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #9
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE6	// Do NOT change this line
+Offset	=31
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #10
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE7	// Do NOT change this line
+Offset	=32
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #11
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE8	// Do NOT change this line
+Offset	=33
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #12
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CE9	// Do NOT change this line
+Offset	=34
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= USB HS Physical Connector #13
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=CEA	// Do NOT change this line
+Offset	=35
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= TCSS CPU USB SS Physical Connector #0
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=92B	// Do NOT change this line
+Offset	=3EA
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[00]Disabled	// Move "*" to the desired Option
+         *[01]Enabled
+
+Setup Question	= TCSS CPU USB SS Physical Connector #1
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=92C	// Do NOT change this line
+Offset	=3EB
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= TCSS CPU USB SS Physical Connector #2
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=92D	// Do NOT change this line
+Offset	=3EC
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= TCSS CPU USB SS Physical Connector #3
+Help String	= Enable/Disable this USB Physical Connector (physical port).  Once disabled, any USB devices plug into the connector will not be detected by BIOS or OS.
+Token	=92E	// Do NOT change this line
+Offset	=3ED
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PCI Express Root Port 4
+Help String	= Control the PCI Express Root Port.
+Token	=DCC	// Do NOT change this line
+Offset	=102
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PCI Express Root Port 9
+Help String	= Control the PCI Express Root Port.
+Token	=E67	// Do NOT change this line
+Offset	=107
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 0
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=577	// Do NOT change this line
+Offset	=740
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 1
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=578	// Do NOT change this line
+Offset	=741
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 2
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=579	// Do NOT change this line
+Offset	=742
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 3
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=57A	// Do NOT change this line
+Offset	=743
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 4
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=57B	// Do NOT change this line
+Offset	=744
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 5
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=57C	// Do NOT change this line
+Offset	=745
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 6
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=57D	// Do NOT change this line
+Offset	=746
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Sata Port 7
+Help String	= Setup option to control the SATA port RTD3 functionality
+Token	=57E	// Do NOT change this line
+Offset	=747
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Port 0
+Help String	= Enable or Disable SATA Port
+Token	=79D	// Do NOT change this line
+Offset	=4A
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Port 2
+Help String	= Enable or Disable SATA Port
+Token	=7A1	// Do NOT change this line
+Offset	=4C
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Port 3
+Help String	= Enable or Disable SATA Port
+Token	=7A5	// Do NOT change this line
+Offset	=4D
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Port 4
+Help String	= Enable or Disable SATA Port
+Token	=7A9	// Do NOT change this line
+Offset	=4E
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Port 5
+Help String	= Enable or Disable SATA Port
+Token	=7AD	// Do NOT change this line
+Offset	=4F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Port 6
+Help String	= Enable or Disable SATA Port
+Token	=7B1	// Do NOT change this line
+Offset	=50
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Port 7
+Help String	= Enable or Disable SATA Port
+Token	=7B5	// Do NOT change this line
+Offset	=51
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+// Setup Question	=   Port 0
+// Help String	= Enable or Disable SATA Port
+// Token	=CF0	// Do NOT change this line
+// Offset	=4A
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[00]Disabled	// Move "*" to the desired Option
+//         [01]Enabled
+
+Setup Question	=   Port 1
+Help String	= Enable or Disable SATA Port
+Token	=CFB	// Do NOT change this line
+Offset	=4B
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+// Setup Question	=   Port 2
+// Help String	= Enable or Disable SATA Port
+// Token	=D06	// Do NOT change this line
+// Offset	=4C
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[00]Disabled	// Move "*" to the desired Option
+//         [01]Enabled
+
+// Setup Question	=   Port 3
+// Help String	= Enable or Disable SATA Port
+// Token	=D11	// Do NOT change this line
+// Offset	=4D
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[00]Disabled	// Move "*" to the desired Option
+//         [01]Enabled
+
+// Setup Question	=   Port 4
+// Help String	= Enable or Disable SATA Port
+// Token	=D1C	// Do NOT change this line
+// Offset	=4E
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[00]Disabled	// Move "*" to the desired Option
+//         [01]Enabled
+
+// Setup Question	=   Port 5
+// Help String	= Enable or Disable SATA Port
+// Token	=D27	// Do NOT change this line
+// Offset	=4F
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[00]Disabled	// Move "*" to the desired Option
+//         [01]Enabled
+
+// Setup Question	=   Port 6
+// Help String	= Enable or Disable SATA Port
+// Token	=D32	// Do NOT change this line
+// Offset	=50
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[00]Disabled	// Move "*" to the desired Option
+//         [01]Enabled
+
+// Setup Question	=   Port 7
+// Help String	= Enable or Disable SATA Port
+// Token	=D3D	// Do NOT change this line
+// Offset	=51
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[00]Disabled	// Move "*" to the desired Option
+//         [01]Enabled
+
+// Setup Question	= SATA Controller(s)
+// Help String	= Enable/Disable SATA Device.
+// Token	=CEC	// Do NOT change this line
+// Offset	=48
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=*[01]Enabled	// Move "*" to the desired Option
+//         [00]Disabled
+
+Setup Question	= SATA Controller(s)
+Help String	= Enable/Disable SATA Device.
+Token	=79A	// Do NOT change this line
+Offset	=48
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[01]Enabled	// Move "*" to the desired Option
+         *[00]Disabled
+
+Setup Question	= APP Center Download & Install
+Help String	= APP Center Download & Install
+Token	=790	// Do NOT change this line
+Offset	=117A
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   CNVi Mode
+Help String	= This option configures Connectivity.   [Auto Detection] means that if Discrete solution is discovered it will be enabled by default. Otherwise Integrated solution (CNVi) will be enabled;   [Disable Integrated] disables Integrated Solution.   NOTE: When CNVi is present, the GPIO pins that are used for radio interface cannot be assigned to the other native function.
+Token	=274	// Do NOT change this line
+Offset	=734
+Width	=01
+BIOS Default	=[01]Auto Detection 
+Options	=*[00]Disable Integrated	// Move "*" to the desired Option
+         [01]Auto Detection
+
+Setup Question	=   Wi-Fi Core
+Help String	= This is an option intended to Enable/Disable Wi-Fi Core in CNVi
+Token	=275	// Do NOT change this line
+Offset	=735
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[01]Enabled	// Move "*" to the desired Option
+         *[00]Disabled
+
+Setup Question	=   BT Core
+Help String	= This is an option intended to Enable/Disable BT Core in CNVi
+Token	=276	// Do NOT change this line
+Offset	=736
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[01]Enabled	// Move "*" to the desired Option
+         *[00]Disabled
+
+Setup Question	= Internal Graphics
+Help String	= Keep IGFX enabled based on the setup options.
+Token	=7BB	// Do NOT change this line
+Offset	=B7
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[02]Auto	// Move "*" to the desired Option
+         *[00]Disabled
+         [01]Enabled
+
+// Setup Question	= Internal Graphics
+// Help String	= Keep IGFX enabled based on the setup options.
+// Token	=882	// Do NOT change this line
+// Offset	=B7
+// Width	=01
+// BIOS Default	=[01]Enabled 
+// Options	=[02]Auto	// Move "*" to the desired Option
+//         *[00]Disabled
+//         [01]Enabled
+
+Setup Question	= PCI Express Root Port 3
+Help String	= Control the PCI Express Root Port.
+Token	=C45	// Do NOT change this line
+Offset	=27A
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= UART0 Controller
+Help String	= Enables/Disables SerialIo Controller  If given device is Function 0 PSF disabling is skipped. PSF default will remain and device PCI CFG Space will still be visible. This is needed to allow PCI enumerator access functions above 0 in a multifunction device.  The following devices depend on each other:  I2C0 and I2C1,2,3  UART0 and UART1,SPI0,1  UART2 and I2C4,5     UART 0 (00:30:00) cannot be disabled when:  1. Child device is enabled like CNVi Bluetooth (\_SB.PC00.UA00.BTH0)   UART 0 (00:30:00) cannot be enabled when:  1. I2S Audio codec is enabled (\_SB.PC00.I2C0.HDAC)
+Token	=1181	// Do NOT change this line
+Offset	=6E9
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+         [03]Communication port (COM)
+
+Setup Question	= I2C4 Controller
+Help String	= Enables/Disables SerialIo Controller  For I2C5 and UART2 to work this device has to be enabled
+Token	=1176	// Do NOT change this line
+Offset	=709
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= I2C5 Controller
+Help String	= Enables/Disables SerialIo Controller  For this device to work I2C4 has to be enabled
+Token	=1177	// Do NOT change this line
+Offset	=70A
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Windows 10 Thunderbolt support
+Help String	= Windows 10 Thunderbolt support
+Token	=28A4	// Do NOT change this line
+Offset	=7EF
+Width	=01
+BIOS Default	=[02]Enable + RTD3 
+Options	=[02]Enable + RTD3	// Move "*" to the desired Option
+         *[00]Disabled
+
+Setup Question	= RGB Fusion
+Help String	= Onboard RGB Fusion mode
+Token	=799	// Do NOT change this line
+Offset	=1191
+Width	=01
+BIOS Default	=[03]Static Mode 
+Options	=*[00]Off	// Move "*" to the desired Option
+         [01]Pulse Mode
+         [02]Color Cycle
+         [03]Static Mode
+         [04]Flash Mode
+         [05]Double Flash
+
+Setup Question	= Enable Hibernation
+Help String	= Enables or Disables System ability to Hibernate (OS/S4 Sleep State). This option may be not effective with some OS.
+Token	=735	// Do NOT change this line
+Offset	=BFF
+Width	=01
+BIOS Default	=1 
+Value	=0	// Enabled = 1, Disabled = 0
+
+// Setup Question	= Memory Boot Mode
+// Help String	= Enables or disables the fast pass thru the MRC.
+// Token	=138	// Do NOT change this line
+// Offset	=DC9
+// Width	=01
+// BIOS Default	=[00]Auto 
+// Options	=*[00]Auto	// Move "*" to the desired Option
+//         [01]Normal
+//         [02]Enable Fast Boot
+//         [03]Disable Fast Boot
+
+Setup Question	= Memory Boot Mode
+Help String	= Enables or disables the fast pass thru the MRC.
+Token	=A2	// Do NOT change this line
+Offset	=DC9
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Normal
+         [02]Enable Fast Boot
+         *[03]Disable Fast Boot
+
+Setup Question	= Fast Boot
+Help String	= Enable/Disable fast path thru the MRC
+Token	=853	// Do NOT change this line
+Offset	=18F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PCI Express Root Port 1
+Help String	= Control the PCI Express Root Port.
+Token	=D6F	// Do NOT change this line
+Offset	=FF
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Audio Controller
+Help String	= Control Detection of the HD-Audio device.    Disabled = HDA will be unconditionally disabled    Enabled = HDA will be unconditionally enabled.
+Token	=7BC	// Do NOT change this line
+Offset	=58F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Intel (VMX) Virtualization Technology
+Help String	= When enabled, a VMM can utilize the additional hardware capabilities provided by Vanderpool Technology.
+Token	=22B	// Do NOT change this line
+Offset	=B9
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Advanced Error Reporting
+Help String	= Advanced Error Reporting Enable/Disable.
+Token	=C06	// Do NOT change this line
+Offset	=341
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Channel Interleaving
+Help String	= 'Auto' lets the BIOS automatically to configure this setting.  'Enabled' allows the system to simultaneously access different memory channels to increase memory performance and stability.
+Token	=B1	// Do NOT change this line
+Offset	=DE2
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=*[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         [02]Disabled
+
+Setup Question	= Fine Granularity Refresh
+Help String	= Fine Granularity Refresh
+Token	=AA	// Do NOT change this line
+Offset	=DD0
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Memory Enhancement Settings
+Help String	= Enhanced Stability = Improved stability. Note: may impact overall performance.  Normal = Standard settings. Enhanced performance = Improved performance. Note: may impact overall system stability.
+Token	=AD	// Do NOT change this line
+Offset	=DD5
+Width	=01
+BIOS Default	=[FF]Auto 
+Options	=[FF]Auto	// Move "*" to the desired Option
+         *[01]Enhanced Performance
+         [02]RdEQ Mode 1
+         [03]RdEQ Mode 2
+
+Setup Question	= SA GV
+Help String	= System Agent Geyserville. Can disable, fix to a specific point, or enable frequency switching.
+Token	=A3	// Do NOT change this line
+Offset	=DCA
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         *[02]Disabled
+
+Setup Question	= Dynamic Memory Boost
+Help String	= Enable/Disable Dynamic Memory Boost feature, Allows automatic switching between default SPD Profile frequency and selected XMP profile frequency. Only valid if an XMP Profile is selected.
+Token	=A4	// Do NOT change this line
+Offset	=DCB
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         *[02]Disabled
+
+Setup Question	= Realtime Memory Frequency
+Help String	= Enable/Disable Realtime Memory Frequency feature, Allows manual switching in runtime between default SPD Profile frequency and selected XMP profile frequency. Only valid if an XMP Profile is selected.
+Token	=A5	// Do NOT change this line
+Offset	=DD1
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         *[02]Disabled
+
+Setup Question	= Dynamic Memory Performance Boost
+Help String	= Enable/Disable Dynamic Memory Performance Boost feature, Allows automatic switching between default Vdd/VddQ and selected Vdd/VddQ.
+Token	=A6	// Do NOT change this line
+Offset	=DCC
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         *[02]Disabled
+
+Setup Question	= Realtime Memory Timing
+Help String	= Enable/Disable realtime memory timings. When enabled, the system will allow performing realtime memory timing changes after MRC_DONE.
+Token	=AC	// Do NOT change this line
+Offset	=DE8
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         *[02]Disabled
+
+Setup Question	= Rank Interleaving
+Help String	= 'Auto' lets the BIOS automatically to configure this setting.  'Enabled' allows the system to simultaneously access different memory ranks to increase memory performance and stability.
+Token	=B2	// Do NOT change this line
+Offset	=DE3
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Memory Timing Mode
+Help String	= 
+Token	=B3	// Do NOT change this line
+Offset	=DE9
+Width	=01
+BIOS Default	=[01]Dynamic 
+Options	=[01]Dynamic	// Move "*" to the desired Option
+         *[02]Fixed
+
+Setup Question	= Memory Timing Channels
+Help String	= Memory Timing Channels
+Token	=B4	// Do NOT change this line
+Offset	=DE7
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Disabled
+         *[02]Enabled
+
+Setup Question	= Early Command Training
+Help String	= Early Command Training
+Token	=BC	// Do NOT change this line
+Offset	=DFE
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= SenseAmp Offset Training
+Help String	= SenseAmp Offset Training
+Token	=BD	// Do NOT change this line
+Offset	=DFF
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Early ReadMPR Timing Centering 2D
+Help String	= 
+Token	=BE	// Do NOT change this line
+Offset	=E00
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read MPR Training
+Help String	= Read MPR Training
+Token	=BF	// Do NOT change this line
+Offset	=E01
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Receive Enable Training
+Help String	= Receive Enable Training
+Token	=C0	// Do NOT change this line
+Offset	=E02
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Jedec Write Leveling
+Help String	= Jedec Write Leveling
+Token	=C1	// Do NOT change this line
+Offset	=E03
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Early Write Time Centering 2D
+Help String	= Early Write Time Centering 2D
+Token	=C2	// Do NOT change this line
+Offset	=E04
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Early Read Time Centering 2D
+Help String	= 
+Token	=C3	// Do NOT change this line
+Offset	=E05
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Write Timing Centering 1D
+Help String	= Write Timing Centering 1D
+Token	=C4	// Do NOT change this line
+Offset	=E06
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Write Voltage Centering 1D
+Help String	= 
+Token	=C5	// Do NOT change this line
+Offset	=E07
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read Timing Centering 1D
+Help String	= Read Timing Centering 1D
+Token	=C6	// Do NOT change this line
+Offset	=E08
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Dimm ODT Training*
+Help String	= Dimm On-Die Termination Training
+Token	=C7	// Do NOT change this line
+Offset	=E09
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= DIMM RON Training*
+Help String	= DIMM RON Training
+Token	=C8	// Do NOT change this line
+Offset	=E0A
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Write Drive Strength/Equalization 2D*
+Help String	= 
+Token	=C9	// Do NOT change this line
+Offset	=E0B
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Write Slew Rate Training*
+Help String	= Write Slew Rate Training
+Token	=CA	// Do NOT change this line
+Offset	=E0C
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read ODT Training*
+Help String	= Read On-Die Termination Training
+Token	=CB	// Do NOT change this line
+Offset	=E0D
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read Equalization Training*
+Help String	= Read Equalization Training
+Token	=CC	// Do NOT change this line
+Offset	=E0E
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read Amplifier Training*
+Help String	= Read Amplifier Training
+Token	=CD	// Do NOT change this line
+Offset	=E0F
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Write Timing Centering 2D
+Help String	= Write Dq-Dqs Timing Centering 2D
+Token	=CE	// Do NOT change this line
+Offset	=E10
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read Timing Centering 2D
+Help String	= Read Dq-Dqs Timing Centering 2D
+Token	=CF	// Do NOT change this line
+Offset	=E11
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Command Voltage Centering
+Help String	= Command Voltage Centering
+Token	=D0	// Do NOT change this line
+Offset	=E14
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Write Voltage Centering 2D
+Help String	= Write Voltage Centering 2D
+Token	=D1	// Do NOT change this line
+Offset	=E12
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read Voltage Centering 2D
+Help String	= Read Voltage Centering 2D
+Token	=D2	// Do NOT change this line
+Offset	=E13
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Late Command Training
+Help String	= Late Command Training
+Token	=D3	// Do NOT change this line
+Offset	=E15
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Round Trip Latency
+Help String	= Round Trip Latency Training
+Token	=D4	// Do NOT change this line
+Offset	=E16
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Turn Around Timing Training
+Help String	= Turn Around Timing Training
+Token	=D5	// Do NOT change this line
+Offset	=E17
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Rank Margin Tool
+Help String	= Rank Margin Tool Training
+Token	=D6	// Do NOT change this line
+Offset	=E18
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Memory Test
+Help String	= Memory Test Training
+Token	=D7	// Do NOT change this line
+Offset	=E19
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= DIMM SPD Alias Test
+Help String	= Test to determine if the SPD has been corrupted to cause memory aliasing.
+Token	=D8	// Do NOT change this line
+Offset	=E1A
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Receive Enable Centering 1D
+Help String	= Receive Enable Centering 1D
+Token	=D9	// Do NOT change this line
+Offset	=E1B
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Retrain Margin Check
+Help String	= Retrain Margin Check
+Token	=DA	// Do NOT change this line
+Offset	=E1C
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Write Drive Strength Up/Dn independently
+Help String	= Write Drive Strength Up/Dn independently
+Token	=DB	// Do NOT change this line
+Offset	=E1D
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Duty Cycle Correction Training
+Help String	= Duty Cycle Correction Training
+Token	=DC	// Do NOT change this line
+Offset	=E1E
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Read Voltage Centering 1D
+Help String	= Read Voltage Centering 1D
+Token	=DD	// Do NOT change this line
+Offset	=E1F
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= TxDqTCO Comp Training*
+Help String	= TxDqTCO Comp Training*
+Token	=DE	// Do NOT change this line
+Offset	=E20
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= ClkTCO Comp Training*
+Help String	= ClkTCO Comp Training*
+Token	=DF	// Do NOT change this line
+Offset	=E21
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Command Slew Rate Training
+Help String	= Command Slew Rate Training
+Token	=E0	// Do NOT change this line
+Offset	=E22
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Command Drive Strength and Equalization 2D
+Help String	= Command Drive Strength and Equalization 2D
+Token	=E1	// Do NOT change this line
+Offset	=E23
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= DIMM CA ODT Training
+Help String	= DIMM CA ODT Training
+Token	=E2	// Do NOT change this line
+Offset	=E24
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= TxDqsTCO Comp Training*
+Help String	= TxDqsTCO Comp Training*
+Token	=E3	// Do NOT change this line
+Offset	=E25
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= CMD/CTL Drive Strength Up/Dn 2D
+Help String	= CMD/CTL Drive Strength Up/Dn 2D
+Token	=E4	// Do NOT change this line
+Offset	=E26
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= VccDLL Bypass Training
+Help String	= VccDLL Bypass Training
+Token	=E5	// Do NOT change this line
+Offset	=E27
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= PanicVttDnLp Training*
+Help String	= PanicVttDnLp Training*
+Token	=E6	// Do NOT change this line
+Offset	=E28
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Vddq Training
+Help String	= Vddq Training
+Token	=E7	// Do NOT change this line
+Offset	=E29
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Rank Margin Tool Per Bit
+Help String	= Rank Margin Tool Per Bit
+Token	=E8	// Do NOT change this line
+Offset	=E2A
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= DIMM DFE Training
+Help String	= DIMM DFE Training
+Token	=E9	// Do NOT change this line
+Offset	=E2C
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Keyboard Wake Up From S3
+Help String	= Enable or disable keyboard wake up function
+Token	=1300	// Do NOT change this line
+Offset	=112B
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Mouse Wake Up From S3
+Help String	= Enable or disable mouse wake up function
+Token	=1301	// Do NOT change this line
+Offset	=112C
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Enhanced Multi-Core Performance
+Help String	= When enabled, the highest Turbo Ratio is applied to all CPU cores.
+Token	=19	// Do NOT change this line
+Offset	=C94
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
+Setup Question	= DDR5 Auto Booster
+Help String	= Enable/Disable DDR5 Dynamic Turbo Boost feature, Allows automatic switching between default frequency and boosted frequency.
+Token	=A7	// Do NOT change this line
+Offset	=DCD
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         *[02]Disabled
+
+Setup Question	= High Bandwidth
+Help String	= High Bandwidth
+Token	=A8	// Do NOT change this line
+Offset	=DCE
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= Low Latency
+Help String	= Low Latency
+Token	=A9	// Do NOT change this line
+Offset	=DCF
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Enabled
+         [02]Disabled
+
+Setup Question	= ACPI Sleep State
+Help String	= Select the highest ACPI sleep state the system will enter when the SUSPEND button is pressed.
+Token	=736	// Do NOT change this line
+Offset	=BFD
+Width	=02
+BIOS Default	=[02]S3 (Suspend to RAM) 
+Options	=*[00]Suspend Disabled	// Move "*" to the desired Option
+         [02]S3 (Suspend to RAM)
+
+Setup Question	= Memory Ref Clock
+Help String	= Adjusts the CPU Base Clock frequency to DRAM frequency ratio.
+Token	=2A3B	// Do NOT change this line
+Offset	=DD8
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]100
+         [02]133
+
+Setup Question	= Hyper-Threading Technology
+Help String	= Enable or disable Intel Hyper-Threading technology. Disabling may affect CPU performance in multi-threaded applications.
+Token	=78	// Do NOT change this line
+Offset	=D37
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
+Setup Question	= LEDs in System Power On State
+Help String	= LEDs in System Power On State: On/Off
+Token	=226	// Do NOT change this line
+Offset	=1196
+Width	=01
+BIOS Default	=[01]On 
+Options	=*[00]Off	// Move "*" to the desired Option
+         [01]On
+
+Setup Question	= LEDs in Sleep, Hibernation, and Soft Off States
+Help String	= LEDs in Sleep, Hibernation, and Soft Off States: On / Off
+Token	=227	// Do NOT change this line
+Offset	=1197
+Width	=01
+BIOS Default	=[00]Off 
+Options	=*[00]Off	// Move "*" to the desired Option
+         [01]On
+
+Setup Question	= AES
+Help String	= Enable/Disable AES (Advanced Encryption Standard)
+Token	=3E6	// Do NOT change this line
+Offset	=BA
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Power Down Mode
+Help String	= CKE Power Down Mode Control
+Token	=276D	// Do NOT change this line
+Offset	=1A2
+Width	=01
+BIOS Default	=[FF]Auto 
+Options	=[FF]Auto	// Move "*" to the desired Option
+         *[00]No Power Down
+         [01]APD
+         [06]PPD-DLLoff
+
+Setup Question	= SelfRefresh Enable
+Help String	= Enable, Disable(Enable= Def)
+Token	=938	// Do NOT change this line
+Offset	=223
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= SelfRefresh IdleTimer
+Help String	= range [64K-1;512]in DLCK800s, (512= Def)
+Token	=939	// Do NOT change this line
+Offset	=224
+Width	=02
+BIOS Default	=<512> 
+Value	=<65535>
+
+Setup Question	= Per Bank Refresh
+Help String	= Enables and Disables the per bank refresh.  This only impacts memory technologies that support PBR: LPDDR4, LPDDR5 and DDR5
+Token	=822	// Do NOT change this line
+Offset	=197
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[00]Disabled	// Move "*" to the desired Option
+         *[01]Enabled
+
+Setup Question	= LPMode
+Help String	= Control LPMode feature
+Token	=85C	// Do NOT change this line
+Offset	=42F
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         [01]Enabled
+         *[02]Disabled
+
+Setup Question	= In-Band ECC Operation Mode
+Help String	= 0: Functional Mode protects requests based on the address range, 1: Makes all requests non protected and ignore range checks, 2:Makes all requests protected and ignore range checks
+Token	=832	// Do NOT change this line
+Offset	=1A6
+Width	=01
+BIOS Default	=[02]2 
+Options	=[00]0	// Move "*" to the desired Option
+         *[01]1
+         [02]2
+
+Setup Question	= DMI Link ASPM Control
+Help String	= The control of Active State Power Management of the DMI Link.
+Token	=27CF	// Do NOT change this line
+Offset	=517
+Width	=01
+BIOS Default	=[02]L1 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [02]L1
+         [04]Auto
+
+Setup Question	= DMI Gen3 ASPM
+Help String	= DMI Gen3 ASPM Support
+Token	=89D	// Do NOT change this line
+Offset	=AC
+Width	=01
+BIOS Default	=[02]ASPM L1 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [04]Auto
+         [01]ASPM L0s
+         [02]ASPM L1
+         [03]ASPM L0sL1
+
+Setup Question	= DMI ASPM
+Help String	= DMI ASPM Support
+Token	=89E	// Do NOT change this line
+Offset	=AD
+Width	=01
+BIOS Default	=[02]ASPM L1 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [04]Auto
+         [01]ASPM L0s
+         [02]ASPM L1
+         [03]ASPM L0sL1
+
+Setup Question	= Disable DSX ACPRESENT PullDown
+Help String	= Disable PCH internal ACPRESENT PullDown when DeepSx or G3 exit.
+Token	=C89	// Do NOT change this line
+Offset	=06
+Width	=01
+BIOS Default	=[00]Disabled 
+Options	=*[01]Enabled	// Move "*" to the desired Option
+         [00]Disabled
+
+Setup Question	= ACPI D3Cold Support
+Help String	= Enable/Disable ACPI D3Cold support to be executed on D3 entry and exit    Note: Disable it would affect the Storage D3 setting
+Token	=2870	// Do NOT change this line
+Offset	=72E
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= PCH Cross Throttling
+Help String	= Enable/Disable the PCH Cross Throttling feature. Only ULT support this feature.
+Token	=C8E	// Do NOT change this line
+Offset	=6BE
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= FIVR Spread Spectrum
+Help String	= Enable or Disable the FIVR Spread Spectrum
+Token	=4C3	// Do NOT change this line
+Offset	=2F6
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Intel Default Settings
+Help String	= Intel Default Settings
+Token	=2A2F	// Do NOT change this line
+Offset	=C93
+Width	=01
+BIOS Default	=[03]Extreme 
+Options	=*[01]Disabled	// Move "*" to the desired Option
+         [02]Performance
+         [03]Extreme
+
+Setup Question	= Energy Efficient Turbo
+Help String	= This feature will opportunistically reduce the turbo frequency to increase efficiency.Its recommended to disable for overclocking since turbo frequency must remain constant.
+Token	=8D	// Do NOT change this line
+Offset	=D43
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
+Setup Question	= Energy Efficient P-state
+Help String	= Enable/Disable Energy Efficient P-state feature. When set to 0, will disable access to ENERGY_PERFORMANCE_BIAS MSR and CPUID Function 6 ECX[3] will read 0 indicating no support for Energy Efficient policy setting. When set to 1 will enable access to ENERGY_PERFORMANCE_BIAS MSR 1B0h and CPUID Function 6 ECX[3] will read 1 indicating Energy Efficient policy setting is supported.
+Token	=465	// Do NOT change this line
+Offset	=3C
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= RFI Mitigation
+Help String	= This is an option intended to Enable/Disable DDR-RFIM feature for Connectivity  This RFI mitigation feature may result in temporary slowdown of the DDR speed.
+Token	=278	// Do NOT change this line
+Offset	=738
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=[01]Enabled	// Move "*" to the desired Option
+         *[00]Disabled
+
+Setup Question	=   Advanced Error Reporting
+Help String	= Advanced Error Reporting Enable/Disable.
+Token	=DBC	// Do NOT change this line
+Offset	=26D
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Discrete Bluetooth Interface
+Help String	= SerialIo UART0 needs to be enabled to select BT interface
+Token	=27C	// Do NOT change this line
+Offset	=620
+Width	=01
+BIOS Default	=[01]USB 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]USB
+
+Setup Question	= Wireless CNV Config Device
+Help String	= Enable or Disable WCCD ACPI device node
+Token	=3D5	// Do NOT change this line
+Offset	=B80
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Advanced Error Reporting
+Help String	= Advanced Error Reporting Enable/Disable.
+Token	=C2F	// Do NOT change this line
+Offset	=342
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Per Core P State OS control mode
+Help String	= Enable/Disable Per Core P state OS control mode. Disabling will set Bit 31 = 1 command 0x06. When set, the highest core request is used for all other core requests.
+Token	=3F7	// Do NOT change this line
+Offset	=0E
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= C6DRAM
+Help String	= Enable/Disable moving of DRAM contents to PRM memory when CPU is in C6 state
+Token	=2721	// Do NOT change this line
+Offset	=114
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= C-States Control
+Help String	= C-States Control
+Token	=7A	// Do NOT change this line
+Offset	=D38
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
+Setup Question	= C states
+Help String	= Enable/Disable CPU Power Management. Allows CPU to go to C states when it's not 100% utilized.
+Token	=272D	// Do NOT change this line
+Offset	=14
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Race To Halt (RTH)
+Help String	= Enable/Disable Race To Halt feature. RTH will dynamically increase CPU frequency in order to enter pkg C-State faster to reduce overall power.
+Token	=8C	// Do NOT change this line
+Offset	=D44
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
+Setup Question	= EC Low Power Mode
+Help String	= This option controls whether EC will go to Low power mode during Low Power S0 Idle State
+Token	=24D	// Do NOT change this line
+Offset	=81
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= EC Notification
+Help String	= Sends EC notification of Low Power S0 Idle State
+Token	=24C	// Do NOT change this line
+Offset	=7F
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Ring to Core offset (Down Bin)
+Help String	= Enable or disable the power management feature that reduces the Ring Ratio by 3 ratios compared to the CPU Core Ratio.
+Token	=81	// Do NOT change this line
+Offset	=D47
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
+Setup Question	=   CPU Enhanced Halt(C1E)
+Help String	= When enabled, the CPU core frequency and voltage will be reduced during system halt state to decrease power consumption.  Auto = BIOS to automatically configure this setting
+Token	=7B	// Do NOT change this line
+Offset	=D39
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
+Setup Question	=   Package C State limit
+Help String	= Select a CPU C-State mode for power-saving when the system is idle.
+Token	=2A66	// Do NOT change this line
+Offset	=D3E
+Width	=01
+BIOS Default	=[FF]Auto 
+Options	=*[00]C0/C1	// Move "*" to the desired Option
+         [01]C2
+         [02]C3
+         [03]C6
+         [04]C7
+         [05]C7s
+         [06]C8
+         [07]C9
+         [08]C10
+         [FF]Auto
+
+Setup Question	=   Enhanced C-states
+Help String	= Enable/Disable C1E. When enabled, CPU will switch to minimum speed when all cores enter C-State.
+Token	=40A	// Do NOT change this line
+Offset	=15
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   C-State Auto Demotion
+Help String	= Configure C-State Auto Demotion
+Token	=40B	// Do NOT change this line
+Offset	=3E
+Width	=01
+BIOS Default	=[01]C1 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]C1
+
+Setup Question	=   C-State Un-demotion
+Help String	= Configure C-State Un-demotion
+Token	=40C	// Do NOT change this line
+Offset	=3F
+Width	=01
+BIOS Default	=[01]C1 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]C1
+
+Setup Question	=   Package C-State Demotion
+Help String	=   Package C-State Demotion
+Token	=40D	// Do NOT change this line
+Offset	=40
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	=   Package C-State Un-demotion
+Help String	=   Package C-State Un-demotion
+Token	=40E	// Do NOT change this line
+Offset	=41
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= CState Pre-Wake
+Help String	= Disable - Sets bit 30 of POWER_CTL MSR(0x1FC) to 1 to disable the Cstate Pre-Wake
+Token	=40F	// Do NOT change this line
+Offset	=3D
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Package C State Limit
+Help String	= Maximum Package C State Limit Setting. Cpu Default: Leaves to Factory default value.Auto: Initializes to deepest available Package C State Limit.
+Token	=411	// Do NOT change this line
+Offset	=4B
+Width	=01
+BIOS Default	=[FF]Auto 
+Options	=*[00]C0/C1	// Move "*" to the desired Option
+         [01]C2
+         [02]C3
+         [03]C6
+         [04]C7
+         [05]C7S
+         [06]C8
+         [07]C9
+         [08]C10
+         [FE]Cpu Default
+         [FF]Auto
+
+Setup Question	= MachineCheck
+Help String	= Enable/Disable Machine Check
+Token	=3E7	// Do NOT change this line
+Offset	=BB
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= Three Strike Counter
+Help String	= Enable/Disable Three Strike Counter
+Token	=701	// Do NOT change this line
+Offset	=125
+Width	=01
+BIOS Default	=[00]Enabled 
+Options	=*[01]Disabled	// Move "*" to the desired Option
+         [00]Enabled
+
+Setup Question	= AP threads Idle Manner
+Help String	= AP threads Idle Manner for waiting signal to run
+Token	=3E5	// Do NOT change this line
+Offset	=120
+Width	=01
+BIOS Default	=[02]MWAIT Loop 
+Options	=[01]HALT Loop	// Move "*" to the desired Option
+         [02]MWAIT Loop
+         *[03]RUN Loop
+
+Setup Question	= MonitorMWait
+Help String	= Enable/Disable MonitorMWait, if Disable MonitorMwait, the AP threads Idle Manner should not set in MWAIT Loop
+Token	=3E8	// Do NOT change this line
+Offset	=BC
+Width	=01
+BIOS Default	=[01]Enabled 
+Options	=*[00]Disabled	// Move "*" to the desired Option
+         [01]Enabled
+
+Setup Question	= BCLK Adaptive Voltage
+Help String	= When this feature is enabled and when the CPU Base Clock is adjusted, the voltages will be adjusted automatically for the turbo frequencies so the system can boot with high CPU Base Clock.
+Token	=1A3	// Do NOT change this line
+Offset	=CF6
+Width	=01
+BIOS Default	=[00]Auto 
+Options	=[00]Auto	// Move "*" to the desired Option
+         *[01]Disabled
+         [02]Enabled
+
