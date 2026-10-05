@@ -1,5 +1,5 @@
 name: Bootstrap validated repository
-# payload complete: 12/12
+# payload verified: 12/12
 
 on:
   push:
