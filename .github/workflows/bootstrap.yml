@@ -1,0 +1,42 @@
+name: Bootstrap validated repository
+
+on:
+  push:
+    paths:
+      - '.github/workflows/bootstrap.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and deploy validated tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat .bootstrap/part-* | base64 -d > /tmp/my-pc-optimization.tar.xz
+          echo "100a3bf2d33f6a6540d7c22004c9b120d0fce50cce8619c14315c52729a6ab9b  /tmp/my-pc-optimization.tar.xz" | sha256sum -c -
+          tar -xJf /tmp/my-pc-optimization.tar.xz -C .
+          rm -rf .bootstrap
+          rm -f .github/workflows/bootstrap.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+
+          git commit -m "Deploy validated personal PC optimization baseline"
+          git push
