@@ -1,4 +1,4 @@
-GAMING DRIVER INSTALLER v2.3.3 - REVIEW BUILD
+ï»¿GAMING DRIVER INSTALLER v2.3.4 - REVIEW BUILD
 =============================================
 
 This is the online post-format version.
@@ -16,12 +16,33 @@ At every run it:
 8. Install performs the entire Audit precheck first. A failed precheck stops
    before ANY installer or PnP driver-binding command is run.
 9. Returns the elevated child's actual exit code to the CMD launcher.
+10. Install mode asserts a temporary Windows Update / PnP driver guard before precheck.
+11. The driver-specific guard is restored to its exact pre-run state after success or failure; NoAutoUpdate is intentionally retained.
+
+WINDOWS UPDATE / PNP BOOTSTRAP GUARD
+------------------------------------
+Install mode temporarily sets the documented machine-policy paths used to stop
+Windows Update from racing driver binding while the vendor packages are being
+resolved and installed:
+  - HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\ExcludeWUDriversInQualityUpdate = 1
+  - HKLM\Software\Policies\Microsoft\Windows\DriverSearching\SearchOrderConfig = 0
+  - HKLM\Software\Policies\Microsoft\Windows\DriverSearching\DontSearchWindowsUpdate = 1
+
+Before changing those three driver-specific values, the installer snapshots
+whether each value existed and its DWORD data. That snapshot is restored after
+6/6 verification, after a failed precheck/install, and on the next run if a
+previous run was interrupted before cleanup. The permanent NoAutoUpdate=1 value
+is not part of that temporary snapshot because it belongs to this machine's
+separate post-format update policy.
 
 SELECTED DRIVER SOURCES
 -----------------------
 AMD B850 chipset:
   AMD official B850 support page -> drivers.amd.com
-  Normal AMD chipset installer.
+  Normal AMD chipset installer using AMD-documented /S unattended deployment.
+  The outer wrapper exit code is diagnostic only: current 8.x packages are
+  accepted only when the registered AMD Chipset Software version verifies.
+  The script waits up to 180 seconds for the inner installer to settle.
   The installed-version check ignores unrelated uninstall entries without
   DisplayName or DisplayVersion before any install decision is made.
 
@@ -70,7 +91,7 @@ NVIDIA RTX 3080 12GB (PCI\VEN_10DE&DEV_220A):
   If extraction does not work on the target Windows build, the step STOPS;
   it does not guess switches for the outer self-extracting EXE.
   NVIDIA App and other optional package selections are not installed by this
-  script. Only exit code 0 or 1 is accepted, then the bound device is checked.
+  script. Only exit code 0 or 1 is accepted, then the bound device is checked for up to 60 seconds.
 
 
 ZOWIE XL2566X+ MONITOR
@@ -81,6 +102,9 @@ The official ZOWIE XL2566X+ V001 / 1.0 WHQL monitor package is bundled at:
 
 SHA-256:
   E8B600BE155F85BA417BEE80EAE6065848885F9E72A331B19D17D53FD9751D38
+
+Precheck can DEFER monitor matching until after the NVIDIA driver binds; the
+real 6/6 install step rescans the display stack before deciding.
 
 The monitor layer:
 - enumerates only PRESENT Monitor-class PnP devices
@@ -151,7 +175,7 @@ Install also repeats a complete six-step precheck in the same run, even if
 you already ran Audit separately. If any precheck fails, no driver installation
 starts. Audit continues to report the remaining steps after a step failure.
 
-After a successful install pass, reboot once, then run the CS2 baseline launcher.
+The temporary driver-specific Windows Update/PnP values are snapshotted before mutation and restored to their exact pre-run state after either success or failure. A small recovery JSON is kept under C:\ProgramData\GamingDriverInstaller only while the guard is active, so a later run can recover stale state after an interrupted process. Automatic Windows Update remains disabled by design (NoAutoUpdate=1). After a successful install pass, reboot once and run the CS2 baseline launcher.
 
 AUDIT AND DOWNLOAD DECISIONS
 ----------------------------
