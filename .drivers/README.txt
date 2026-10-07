@@ -1,4 +1,4 @@
-ï»¿GAMING DRIVER INSTALLER v2.3.4 - REVIEW BUILD
+GAMING DRIVER INSTALLER v2.3.4 - REVIEW BUILD
 =============================================
 
 This is the online post-format version.
