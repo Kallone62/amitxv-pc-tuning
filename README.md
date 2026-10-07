@@ -105,6 +105,8 @@ Its selected path covers:
 
 The driver installer is designed around audit-before-mutation, exact-device/INF matching, vendor/hash/signature checks where available, refusal of automatic downgrades, and post-install binding verification. It does **not** use DDU or a blanket Driver Store purge.
 
+The current driver layer is **v2.3.4 (review build)**. For a clean-format install it snapshots the pre-run Windows Update/PnP driver-policy state, applies a temporary guard while vendor drivers are resolved and bound, and restores those temporary values on both success and failure; interrupted runs retain a small recovery state for the next launch. AMD chipset success is judged by the registered package version rather than the outer wrapper exit code alone, PnP/NVIDIA binding gets a longer settle-and-verify window, and the ZOWIE monitor step can rescan after the NVIDIA display stack changes. `.drivers/Check_Gaming_Driver_Syntax.cmd` and `.drivers/Audit_Gaming_Drivers_v2.cmd` are the intended non-mutating checks before the real install.
+
 ### 3. Post-format applications
 
 Preview first if desired:
