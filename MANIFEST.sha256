@@ -1,12 +1,14 @@
+dc702938d346c426b8ba64a93abadd60826929103101a2450d16234a763e4cd2  ./.drivers/Audit_Gaming_Drivers_v2.cmd
+456d1780ac83e93196e214bdf8b555a0fc4e8f3a8ae2d216b5e560a59bb720fc  ./.drivers/Check_Gaming_Driver_Syntax.cmd
 43e5c08c74541c1faec8611aba48a8ea95d4f45220dff90cc8d11976b1e4a8f9  ./.bios/README.md
 39c4d677c23345a6b42bfc64b0285a13de404018d1659b94d3750cf04b8274ab  ./.bios/current/ROG-B850-I/README.md
 ad8ebb87679469d99bcd0e4ed8a630d72b6488c783a437329e7c5a600e269c8d  ./.bios/legacy/Z690-Tachyon/F29Z690TachyonExperimental.txt
 8fd3103e8d34f82a6741ba4de9dc1b4c9d173e7a797508ac28aa0bc515d216bf  ./.bios/legacy/Z690-Tachyon/F29Z690TachyonSafe.txt
 d3eb21489e1918c71ee0341784f5bb28992a8d000719deed0c7af24954a5bb40  ./.bios/legacy/Z690-Tachyon/README.md
 e8b600be155f85ba417bee80eae6065848885f9e72a331b19d17d53fd9751d38  ./.drivers/Assets/Monitor/XL2566X+_WHQL dirver_V001_Windows_240605180238.7z
-79c8f1c9fc565619049b34b80dc2a7f1ab0d1e56bc3745ce07a6f82145f68099  ./.drivers/Install-Gaming-Drivers-v2-LatestOfficial.ps1
-7675ac668ea6dc32134e8f3095befe673900173cb92ee86f6341ef84e1623181  ./.drivers/README.txt
-8a62467568d96b71b375b934f4681dec19e569ce4c4617d2bb26e596a9c07ff5  ./.drivers/Run_Gaming_Drivers_v2.cmd
+777552b71a60f065115675d2f7b63ebbe307cee39725ed47f7fb3c2405a90338  ./.drivers/Install-Gaming-Drivers-v2-LatestOfficial.ps1
+c23d14bd2a668882d7e5f14af1ed6b227b220d766a2e76ee1967a03354264ba7  ./.drivers/README.txt
+d1d2ff67f9cbe83796778620994b5ad45da9047037082e098327b533b2c5882d  ./.drivers/Run_Gaming_Drivers_v2.cmd
 563c6e3e83e45301f39daa2be379193987a679577244dbcc320e899b74572e6b  ./.gitignore
 8c2a21fb1faee391a6924b70ff070ed3ad2e62d12e23cf83883e82e8f84b5fc6  ./.scripts/CS2-GamingOnly-Pro-v1.0.8.ps1
 c9871df1260abeed00a21513b48f034c05fab849e5f38dd636d8928f4f4f1920  ./.scripts/Gaming-Background-Cleanup-v1.ps1
