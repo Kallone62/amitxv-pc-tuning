@@ -491,6 +491,28 @@ function Invoke-QuietUninstallEntry($Entry, [string]$Label) {
     }
 
     if ([string]::IsNullOrWhiteSpace($quiet)) {
+        # Overwolf commonly exposes its silent NSIS command in UninstallString
+        # rather than QuietUninstallString. Accept only that exact registered
+        # OWUninstaller.exe /S path, and verify the vendor signature first.
+        if ($Label -eq 'OVERWOLF') {
+            $registered = Split-RegisteredCommandLine $normal
+            if ($null -ne $registered -and
+                (Split-Path -Leaf $registered.FilePath) -ieq 'OWUninstaller.exe' -and
+                $registered.Arguments -match '(?i)(^|\s)/S(\s|$)' -and
+                (Test-Path -LiteralPath $registered.FilePath -PathType Leaf)) {
+
+                Assert-SignedBy $registered.FilePath 'Overwolf'
+                Write-Host ("[{0}] Registered silent uninstall: {1}" -f $Label,$display)
+                $p = Start-Process -FilePath $registered.FilePath -ArgumentList $registered.Arguments -Wait -PassThru
+                if ($p.ExitCode -notin @(0,3010)) {
+                    throw "$Label registered silent uninstall failed for '$display' (exit $($p.ExitCode))."
+                }
+                return
+            }
+
+            throw "$Label '$display' has no QuietUninstallString and its registered UninstallString is not a verifiable OWUninstaller.exe /S command: $normal"
+        }
+
         throw "$Label '$display' is installed but exposes no QuietUninstallString; refusing to guess an interactive uninstall switch."
     }
 
@@ -955,21 +977,24 @@ function Open-UrlAsInteractiveUser {
 
 function Invoke-PeripheralSetupPages {
     $wootilityUrl = 'https://v5.wootility.io/'
-    $logitechOmmUrl = 'https://support.logi.com/hc/en-us/articles/29742998779415-Onboard-Memory-Manager'
+    # Pin the official Logitech-hosted OMM 2.3.2055 installer directly. The
+    # support article can render without its dynamic Download Now control in
+    # some locales, which is what caused the dead-end page during setup.
+    $logitechOmmUrl = 'https://download01.logi.com/web/ftp/pub/techsupport/gaming/OnboardMemoryManager_2.3.2055.exe'
 
     $wootShortcut = New-UrlShortcut -Name 'Wootility Web' -Url $wootilityUrl
     $logitechShortcut = New-UrlShortcut -Name 'Logitech Onboard Memory Manager' -Url $logitechOmmUrl
 
     if ($Preview) {
-        Add-Record 'PREVIEW' ("Would open Wootility Web + Logitech OMM and create shortcuts: $wootShortcut ; $logitechShortcut")
+        Add-Record 'PREVIEW' ("Would open Wootility Web + official Logitech OMM 2.3.2055 download and create shortcuts: $wootShortcut ; $logitechShortcut")
         return
     }
 
     Open-UrlAsInteractiveUser -Url $wootilityUrl -Label 'Wootility Web'
     Start-Sleep -Seconds 1
-    Open-UrlAsInteractiveUser -Url $logitechOmmUrl -Label 'Logitech Onboard Memory Manager'
+    Open-UrlAsInteractiveUser -Url $logitechOmmUrl -Label 'Logitech Onboard Memory Manager 2.3.2055 download'
 
-    Add-Record 'OPENED / SHORTCUTS CREATED' ("Wootility Web and Logitech OMM pages opened in the normal user session; shortcuts: $wootShortcut ; $logitechShortcut")
+    Add-Record 'OPENED / SHORTCUTS CREATED' ("Wootility Web opened and official Logitech OMM 2.3.2055 download launched in the normal user session; shortcuts: $wootShortcut ; $logitechShortcut")
 }
 
 try {
