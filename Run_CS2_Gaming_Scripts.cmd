@@ -10,12 +10,12 @@ title CS2 Gaming Scripts Launcher - Debug
 
 rem This launcher stays in the package root.
 rem All PowerShell scripts stay inside the package-root\.scripts folder.
-set "LAUNCHER_REVISION=14.6"
+set "LAUNCHER_REVISION=14.8"
 set "LAUNCHER_FILE=%~f0"
 for %%I in ("%~dp0.") do set "LAUNCHER_DIR=%%~fI"
 set "SCRIPTS_DIR=%LAUNCHER_DIR%\.scripts"
 set "LOG_FILE=%LAUNCHER_DIR%\Run_CS2_Gaming_Scripts-debug.log"
-set "WIN_SCRIPT=%SCRIPTS_DIR%\CS2-GamingOnly-Pro-v1.0.8.ps1"
+set "WIN_SCRIPT=%SCRIPTS_DIR%\CS2-GamingOnly-Pro-v1.0.9.ps1"
 set "I226V_SCRIPT=%SCRIPTS_DIR%\I226V_Baseline_v2.ps1"
 set "DEVICE_SCRIPT=%SCRIPTS_DIR%\Gaming-Device-Disable-v2.ps1"
 set "BACKGROUND_SCRIPT=%SCRIPTS_DIR%\Gaming-Background-Cleanup-v1.ps1"
@@ -61,7 +61,7 @@ echo.
 
 if not exist "%WIN_SCRIPT%" (
     echo.
-    echo ERROR: CS2-GamingOnly-Pro-v1.0.8.ps1 was not found.
+    echo ERROR: CS2-GamingOnly-Pro-v1.0.9.ps1 was not found.
     echo Expected:
     echo "%WIN_SCRIPT%"
     echo.
@@ -73,7 +73,7 @@ if not exist "%WIN_SCRIPT%" (
 if not exist "%I226V_SCRIPT%" (
     echo.
     echo ERROR: I226V_Baseline_v2.ps1 was not found.
-    echo Put it inside the .scripts folder beside CS2-GamingOnly-Pro-v1.0.8.ps1.
+    echo Put it inside the .scripts folder beside CS2-GamingOnly-Pro-v1.0.9.ps1.
     echo Expected:
     echo "%I226V_SCRIPT%"
     echo.
@@ -312,7 +312,7 @@ popd
 set "RUN_FINISHED=%DATE% %TIME%"
 >>"%LOG_FILE%" echo Finished: %RUN_FINISHED%
 >>"%LOG_FILE%" echo Preflight: %PREFLIGHT_STATUS%
->>"%LOG_FILE%" echo CS2 v1.0.8: %WIN_STATUS% - exit code %WIN_EXIT_CODE%
+>>"%LOG_FILE%" echo CS2 v1.0.9: %WIN_STATUS% - exit code %WIN_EXIT_CODE%
 >>"%LOG_FILE%" echo Intel I226-V v2: %I226V_STATUS% - exit code %I226V_EXIT_CODE%
 >>"%LOG_FILE%" echo Gaming device disable: %DEVICE_STATUS% - exit code %DEVICE_EXIT_CODE%
 >>"%LOG_FILE%" echo Gaming background cleanup: %BACKGROUND_STATUS% - exit code %BACKGROUND_EXIT_CODE%
@@ -329,7 +329,7 @@ echo Started          : %RUN_STARTED%
 echo Finished         : %RUN_FINISHED%
 echo Scripts folder   : "%SCRIPTS_DIR%"
 echo Preflight        : %PREFLIGHT_STATUS%
-echo CS2 v1.0.8       : %WIN_STATUS% ^(exit code: %WIN_EXIT_CODE%^)
+echo CS2 v1.0.9       : %WIN_STATUS% ^(exit code: %WIN_EXIT_CODE%^)
 echo Intel I226-V v2  : %I226V_STATUS% ^(exit code: %I226V_EXIT_CODE%^)
 echo Device disable   : %DEVICE_STATUS% ^(exit code: %DEVICE_EXIT_CODE%^)
 echo Background cleanup: %BACKGROUND_STATUS% ^(exit code: %BACKGROUND_EXIT_CODE%^)
@@ -354,5 +354,5 @@ echo Debug log       : "%LOG_FILE%"
 echo ============================================================
 echo.
 echo This debug window will stay open. Type EXIT to close it.
-rem END OF FILE - REVISION 14.6
+rem END OF FILE - REVISION 14.8
 exit /b %FINAL_EXIT_CODE%

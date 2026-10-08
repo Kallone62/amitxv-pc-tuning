@@ -25,7 +25,7 @@
       - apply undocumented registry mirrors
 
     Some accepted settings such as Online Tips and Cloud/WNS notifications are
-    already owned by CS2-GamingOnly-Pro-v1.0.8.ps1 and are therefore not
+    already owned by CS2-GamingOnly-Pro-v1.0.9.ps1 and are therefore not
     duplicated here.
 
     Offline Files and EnableCDP require a reboot before their effective Windows

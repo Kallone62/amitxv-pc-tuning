@@ -1,4 +1,4 @@
-#requires -Version 5.1
+﻿#requires -Version 5.1
 param([switch]$Preview)
 
 $ErrorActionPreference = 'Stop'
@@ -29,12 +29,13 @@ $steps = @(
     @{ Name = 'DirectX legacy components (June 2010)'; Kind = 'DirectX' },
     @{ Name = 'Google Chrome'; Kind = 'Winget'; Id = 'Google.Chrome' },
     @{ Name = 'AutoHotkey v2'; Kind = 'Winget'; Id = 'AutoHotkey.AutoHotkey' },
-    @{ Name = 'ExitLag'; Kind = 'ExitLag' },
-    @{ Name = 'FACEIT Anti-Cheat'; Kind = 'Winget'; Id = 'FACEITLTD.FACEITAC' },
+    @{ Name = 'FACEIT Anti-Cheat only'; Kind = 'FaceitACOnly'; Id = 'FACEITLTD.FACEITAC' },
     @{ Name = 'Spotify'; Kind = 'Winget'; Id = 'Spotify.Spotify' },
-    @{ Name = 'TeamSpeak 3.6.2'; Kind = 'Winget'; Id = 'TeamSpeakSystems.TeamSpeakClient'; Version = '3.6.2' },
-    @{ Name = 'Wootility Web shortcut'; Kind = 'WootilityWeb' },
-    @{ Name = 'Steam'; Kind = 'Winget'; Id = 'Valve.Steam' }
+    @{ Name = 'TeamSpeak 3.6.2 only (no Overwolf)'; Kind = 'TeamSpeakClean'; Id = 'TeamSpeakSystems.TeamSpeakClient'; Version = '3.6.2' },
+    @{ Name = 'Peripheral setup pages'; Kind = 'PeripheralPages' },
+    @{ Name = 'Steam'; Kind = 'Winget'; Id = 'Valve.Steam' },
+    @{ Name = 'Bundled extras final guard'; Kind = 'BundleGuard' },
+    @{ Name = 'ExitLag (manual / optional)'; Kind = 'ExitLag' }
 )
 
 function Add-Record([string]$status, [string]$detail) {
@@ -142,17 +143,7 @@ function Test-SteamPresent {
     if (Get-UninstallEntries | Where-Object { $_.DisplayName -eq 'Steam' -and $_.Publisher -match 'Valve' } | Select-Object -First 1) { return $true }
     return $false
 }
-
-function Test-WootilityShortcutPresent {
-    $shortcut = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Wootility Web.url'
-    if (-not (Test-Path -LiteralPath $shortcut -PathType Leaf)) { return $false }
-    try {
-        $content = Get-Content -LiteralPath $shortcut -Raw -ErrorAction Stop
-        return $content -match '(?im)^URL=https://wootility\.io/?\s*$'
-    } catch {
-        return $false
-    }
-}
+
 
 function Get-WingetInstalledInfo([hashtable]$step, [string]$wingetPath, [switch]$WriteLog) {
     $listLog = Join-Path $logDir ('winget-check-{0:00}-{1}.txt' -f $index, $step.Id)
@@ -192,9 +183,6 @@ function Get-ApplicationFallbackState([hashtable]$step) {
         }
         'AutoHotkey.AutoHotkey' {
             if (Test-AutoHotkeyPresent) { return [pscustomobject]@{ Present = $true; Version = ''; Detail = 'AutoHotkey registry/executable detected' } }
-        }
-        'FACEITLTD.FACEITAC' {
-            if (Test-FaceitPresent) { return [pscustomobject]@{ Present = $true; Version = ''; Detail = 'FACEIT Anti-Cheat registry/executable detected' } }
         }
         'Spotify.Spotify' {
             if (Test-SpotifyPresent) { return [pscustomobject]@{ Present = $true; Version = ''; Detail = 'Spotify registry/executable detected' } }
@@ -263,7 +251,7 @@ function Invoke-Winget([hashtable]$step, [string]$wingetPath) {
     }
 
     $args = @('install', '--id', $step.Id, '--exact', '--source', 'winget',
-        '--accept-source-agreements', '--accept-package-agreements', '--disable-interactivity')
+        '--silent', '--accept-source-agreements', '--accept-package-agreements', '--disable-interactivity')
     if ($step.Version) { $args += @('--version', $step.Version) }
 
     $log = Join-Path $logDir ('winget-install-{0:00}-{1}.txt' -f $index, $step.Id)
@@ -442,6 +430,225 @@ function Invoke-DirectX {
     Add-Record 'INSTALLED' "DirectX June 2010 package $directXPackageVersion completed and legacy component set was verified"
 }
 
+
+function Get-OverwolfEntries {
+    return @(
+        Get-UninstallEntries |
+        Where-Object {
+            $n = [string]$_.DisplayName
+            -not [string]::IsNullOrWhiteSpace($n) -and
+            $n -match '(?i)^Overwolf($|\s)'
+        }
+    )
+}
+
+function Test-OverwolfPresent {
+    if (@(Get-OverwolfEntries).Count -gt 0) { return $true }
+
+    foreach ($path in @(
+        (Join-Path $env:LOCALAPPDATA 'Overwolf\OverwolfLauncher.exe'),
+        (Join-Path $env:LOCALAPPDATA 'Overwolf\Overwolf.exe'),
+        $(if (${env:ProgramFiles(x86)}) { Join-Path ${env:ProgramFiles(x86)} 'Overwolf\OverwolfLauncher.exe' }),
+        (Join-Path $env:ProgramFiles 'Overwolf\OverwolfLauncher.exe')
+    )) {
+        if ($path -and (Test-Path -LiteralPath $path -PathType Leaf)) { return $true }
+    }
+
+    return $false
+}
+
+function Split-RegisteredCommandLine([string]$CommandLine) {
+    if ([string]::IsNullOrWhiteSpace($CommandLine)) { return $null }
+
+    $s = $CommandLine.Trim()
+    if ($s -match '^"([^"]+)"\s*(.*)$') {
+        return [pscustomobject]@{ FilePath = $matches[1]; Arguments = $matches[2] }
+    }
+
+    # Unquoted executable path with no spaces.
+    if ($s -match '^(\S+\.exe)\s*(.*)$') {
+        return [pscustomobject]@{ FilePath = $matches[1]; Arguments = $matches[2] }
+    }
+
+    return $null
+}
+
+function Invoke-QuietUninstallEntry($Entry, [string]$Label) {
+    $display = [string]$Entry.DisplayName
+    $quiet = [string]$Entry.QuietUninstallString
+    $normal = [string]$Entry.UninstallString
+
+    # MSI product code path is deterministic even when QuietUninstallString is absent.
+    if ($normal -match '(?i)MsiExec(?:\.exe)?\s+/[IX]\s*({[0-9A-Fa-f-]+})') {
+        $productCode = $matches[1]
+        Write-Host ("[{0}] MSI uninstall: {1}" -f $Label,$display)
+        $p = Start-Process -FilePath "$env:SystemRoot\System32\msiexec.exe" `
+            -ArgumentList @('/x',$productCode,'/qn','/norestart') -Wait -PassThru
+        if ($p.ExitCode -notin @(0,1605,1614,3010)) {
+            throw "$Label uninstall failed for '$display' (MSI exit $($p.ExitCode))."
+        }
+        return
+    }
+
+    if ([string]::IsNullOrWhiteSpace($quiet)) {
+        throw "$Label '$display' is installed but exposes no QuietUninstallString; refusing to guess an interactive uninstall switch."
+    }
+
+    $cmd = Split-RegisteredCommandLine $quiet
+    if ($null -eq $cmd -or -not (Test-Path -LiteralPath $cmd.FilePath -PathType Leaf)) {
+        throw "$Label '$display' exposes a QuietUninstallString that could not be parsed safely: $quiet"
+    }
+
+    Write-Host ("[{0}] Quiet uninstall: {1}" -f $Label,$display)
+    $args = if ([string]::IsNullOrWhiteSpace($cmd.Arguments)) { @() } else { $cmd.Arguments }
+    $p = Start-Process -FilePath $cmd.FilePath -ArgumentList $args -Wait -PassThru
+    if ($p.ExitCode -notin @(0,3010)) {
+        throw "$Label quiet uninstall failed for '$display' (exit $($p.ExitCode))."
+    }
+}
+
+function Remove-OverwolfStrict {
+    if (-not (Test-OverwolfPresent)) {
+        Write-Host '[BUNDLE GUARD] Overwolf absent.'
+        return
+    }
+
+    Write-Host '[BUNDLE GUARD] Overwolf detected; removing bundled platform...' -ForegroundColor Yellow
+
+    $entries = @(Get-OverwolfEntries)
+    if ($entries.Count -eq 0) {
+        throw 'Overwolf executable was detected but no uninstall entry exists; automatic cleanup cannot be verified safely.'
+    }
+
+    foreach ($entry in $entries) {
+        Invoke-QuietUninstallEntry -Entry $entry -Label 'OVERWOLF'
+    }
+
+    $deadline = (Get-Date).AddSeconds(90)
+    while ((Get-Date) -lt $deadline -and (Test-OverwolfPresent)) {
+        Start-Sleep -Seconds 2
+    }
+
+    if (Test-OverwolfPresent) {
+        throw 'Overwolf is still present after the registered quiet uninstall completed.'
+    }
+
+    Write-Host '[BUNDLE GUARD] Overwolf removal verified.' -ForegroundColor Green
+}
+
+function Invoke-TeamSpeakClean {
+    $targetVersion = '3.6.2'
+    $installerUrl = 'https://files.teamspeak-services.com/releases/client/3.6.2/TeamSpeak3-Client-win64-3.6.2.exe'
+    $expectedSha256 = 'EAB9E0C1A7134643E5F7116B7E0E58FAFFB20D6DB528F8B333D2C2B5D1AB68AE'
+    $installer = Join-Path $logDir 'TeamSpeak3-Client-win64-3.6.2.exe'
+
+    $installedVersion = Get-TeamSpeakInstalledVersion
+    if ($installedVersion -eq $targetVersion) {
+        Remove-OverwolfStrict
+        Add-Record 'ALREADY INSTALLED' 'TeamSpeak 3.6.2 verified; Overwolf absent'
+        return
+    }
+
+    if ($installedVersion) {
+        throw "TeamSpeak is present at version $installedVersion, but this baseline is pinned to $targetVersion. Refusing an in-place version change."
+    }
+
+    if ($Preview) {
+        Add-Record 'PREVIEW' 'Would install official TeamSpeak 3.6.2 with /S /CURRENTUSER and without the /Overwolf opt-in switch'
+        return
+    }
+
+    if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
+        Write-Host 'Downloading official TeamSpeak 3.6.2 installer...'
+        Invoke-WebRequest -Uri $installerUrl -OutFile $installer -UseBasicParsing
+    }
+
+    $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $installer).Hash
+    if ($hash -ne $expectedSha256) {
+        throw "TeamSpeak installer SHA-256 mismatch. Expected $expectedSha256, got $hash"
+    }
+    Assert-SignedBy $installer 'TeamSpeak'
+
+    # TeamSpeak's installer uses /Overwolf as the explicit opt-in. We omit it.
+    $p = Start-Process -FilePath $installer -ArgumentList @('/S','/CURRENTUSER') -Wait -PassThru
+    if ($p.ExitCode -notin @(0,3010)) {
+        throw "TeamSpeak 3.6.2 installer failed with exit code $($p.ExitCode)."
+    }
+
+    $deadline = (Get-Date).AddSeconds(60)
+    do {
+        $installedVersion = Get-TeamSpeakInstalledVersion
+        if ($installedVersion -eq $targetVersion) { break }
+        Start-Sleep -Seconds 2
+    } while ((Get-Date) -lt $deadline)
+
+    if ($installedVersion -ne $targetVersion) {
+        throw "TeamSpeak installer completed, but pinned version $targetVersion could not be verified."
+    }
+
+    # Fail closed if any bundled Overwolf platform appeared despite the opt-out path.
+    Remove-OverwolfStrict
+
+    Add-Record 'INSTALLED / VERIFIED' 'TeamSpeak 3.6.2 installed from official signed installer; /Overwolf was not used; Overwolf absent'
+}
+
+function Enforce-FaceitACOnlyStable([string]$wingetPath) {
+    # FACEIT's AC bootstrapper can finish chained installs asynchronously.
+    # Enforce the desired final state for a full settling window.
+    $deadline = (Get-Date).AddSeconds(180)
+    $stableSince = $null
+
+    while ((Get-Date) -lt $deadline) {
+        if (-not (Test-FaceitPresent)) {
+            throw 'FACEIT Anti-Cheat disappeared while enforcing the AC-only final state.'
+        }
+
+        if (Test-FaceitPlatformClientPresent) {
+            $stableSince = $null
+            Remove-FaceitPlatformClient -wingetPath $wingetPath
+            Start-Sleep -Seconds 3
+            continue
+        }
+
+        if ($null -eq $stableSince) {
+            $stableSince = Get-Date
+        }
+
+        if ((Get-Date) -ge $stableSince.AddSeconds(30)) {
+            Write-Host '[FACEIT] AC-only state remained stable for 30 seconds.' -ForegroundColor Green
+            return
+        }
+
+        Start-Sleep -Seconds 3
+    }
+
+    if (Test-FaceitPlatformClientPresent) {
+        throw 'FACEIT platform client reappeared during the AC-only stabilization window.'
+    }
+    if (-not (Test-FaceitPresent)) {
+        throw 'FACEIT Anti-Cheat final verification failed.'
+    }
+}
+
+function Invoke-BundleGuard([string]$wingetPath) {
+    Remove-OverwolfStrict
+
+    if (Test-FaceitPlatformClientPresent) {
+        Write-Host '[BUNDLE GUARD] FACEIT platform client detected late; removing it...' -ForegroundColor Yellow
+        Remove-FaceitPlatformClient -wingetPath $wingetPath
+    }
+
+    if (Test-FaceitPlatformClientPresent) {
+        throw 'Bundled-extras guard failed: FACEIT platform client is still installed.'
+    }
+    if (Test-OverwolfPresent) {
+        throw 'Bundled-extras guard failed: Overwolf is still installed.'
+    }
+
+    Add-Record 'VERIFIED' 'Overwolf absent; separate FACEIT platform client absent'
+}
+
+
 function Invoke-ExitLag {
     if (Test-ExitLagPresent) {
         Add-Record 'ALREADY INSTALLED' 'ExitLag registry/executable detected; installer skipped'
@@ -449,26 +656,154 @@ function Invoke-ExitLag {
     }
 
     $localInstaller = Join-Path $root 'ExitLag-installer.exe'
+
     if (-not (Test-Path -LiteralPath $localInstaller -PathType Leaf)) {
-        Write-Host 'ExitLag: open the official page, download the Windows installer, and save it as:'
-        Write-Host ('  ' + $localInstaller)
-        Write-Host 'The installer will wait here. It will NOT proceed to FACEIT until ExitLag completes.'
-        Start-Process 'https://www.exitlag.com/download/'
-        [void](Read-Host 'Press ENTER after saving the installer to the path above')
+        Write-Host 'ExitLag is a manual/optional final step.'
+        Write-Host 'Opening the official download page. Install it whenever you want.'
+        Write-Host ('If you want this script to install it on a later rerun, save the official installer as: ' + $localInstaller)
+        try {
+            Start-Process 'https://www.exitlag.com/download/' -ErrorAction Stop
+        } catch {
+            Write-Warning ('Could not open the ExitLag page automatically: ' + $_.Exception.Message)
+        }
+        Add-Record 'DEFERRED / MANUAL' 'ExitLag installer is not present; all automated application steps were allowed to complete'
+        return
     }
 
-    Assert-SignedBy $localInstaller 'ExitLag'
+    try {
+        Assert-SignedBy $localInstaller 'ExitLag'
+    } catch {
+        Write-Warning $_.Exception.Message
+        Add-Record 'DEFERRED / MANUAL' ('Local ExitLag installer was not executed because its signature could not be verified: ' + $_.Exception.Message)
+        return
+    }
+
     $process = Start-Process -FilePath $localInstaller -Wait -PassThru
     if ($process.ExitCode -notin @(0, 3010)) {
         if (Test-ExitLagPresent) {
-            Add-Record 'INSTALLED / VERIFIED' "ExitLag installer returned $($process.ExitCode), but ExitLag is verified present"
+            Add-Record 'INSTALLED / VERIFIED' ("ExitLag installer returned $($process.ExitCode), but ExitLag is verified present")
             return
         }
-        throw "ExitLag installer failed: $($process.ExitCode)"
+        Write-Warning ("ExitLag installer returned $($process.ExitCode). This optional step will not fail the rest of the application baseline.")
+        Add-Record 'DEFERRED / MANUAL' ("ExitLag installer returned $($process.ExitCode) and installation could not be verified")
+        return
     }
-    if (-not (Test-ExitLagPresent)) { throw 'ExitLag installer exited but ExitLag was not found in installed applications or its expected path.' }
-    if ($process.ExitCode -eq 3010) { throw 'ExitLag requested restart (3010). Restart, then rerun this CMD.' }
+
+    if (-not (Test-ExitLagPresent)) {
+        Add-Record 'DEFERRED / MANUAL' 'ExitLag installer exited, but installed state could not be verified'
+        return
+    }
+
+    if ($process.ExitCode -eq 3010) {
+        Add-Record 'INSTALLED / REBOOT REQUIRED' 'ExitLag verified after installer completion; installer requested reboot (3010)'
+        return
+    }
+
     Add-Record 'INSTALLED' 'ExitLag verified after installer completion'
+}
+
+
+function Test-FaceitPlatformClientPresent {
+    # Prefer the distinct WinGet package identity when correlation is available.
+    try {
+        $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
+        if ($winget) {
+            $oldPreference = $ErrorActionPreference
+            try {
+                $ErrorActionPreference = 'Continue'
+                $out = & $winget.Source list --id FACEITLTD.FACEITClient --exact --accept-source-agreements 2>&1
+                $code = $LASTEXITCODE
+            } finally {
+                $ErrorActionPreference = $oldPreference
+            }
+            if ($code -eq 0 -and (($out | Out-String) -match '(?i)FACEITLTD\.FACEITClient|(^|\s)FACEIT(\s|$)')) {
+                return $true
+            }
+        }
+    } catch { }
+
+    # Fallback: match the platform client, but deliberately exclude AC entries.
+    $entry = Get-UninstallEntries | Where-Object {
+        $n = [string]$_.DisplayName
+        $n -match '(?i)^FACEIT($|\s|Client)' -and
+        $n -notmatch '(?i)Anti.?Cheat|FACEIT\s*AC'
+    } | Select-Object -First 1
+    return ($null -ne $entry)
+}
+
+function Remove-FaceitPlatformClient([string]$wingetPath) {
+    if (-not (Test-FaceitPlatformClientPresent)) {
+        Write-Host '[FACEIT] Separate platform client not detected after Anti-Cheat installation.'
+        return
+    }
+
+    Write-Host '[FACEIT] Separate FACEIT platform client detected; removing it while preserving Anti-Cheat...'
+
+    $oldPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $wingetPath uninstall --id FACEITLTD.FACEITClient --exact --silent --disable-interactivity 2>&1 |
+            Out-Host
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $oldPreference
+    }
+
+    # Some publisher bootstrappers finish child installs asynchronously.
+    # Give Apps & Features / WinGet correlation time to settle before declaring failure.
+    $deadline = (Get-Date).AddSeconds(60)
+    while ((Get-Date) -lt $deadline -and (Test-FaceitPlatformClientPresent)) {
+        Start-Sleep -Seconds 2
+    }
+
+    if (Test-FaceitPlatformClientPresent) {
+        throw "FACEIT platform client is still present after targeted uninstall attempt (WinGet exit $code)."
+    }
+
+    if (-not (Test-FaceitPresent)) {
+        throw 'FACEIT platform client was removed, but FACEIT Anti-Cheat is no longer verified present. AC-only final state was not achieved.'
+    }
+
+    Write-Host '[FACEIT] AC-only final state verified: platform client absent, Anti-Cheat present.'
+}
+
+function Invoke-FaceitACOnly([string]$wingetPath) {
+    if (-not (Test-FaceitPresent)) {
+        Write-Host '[FACEIT] Installing FACEIT Anti-Cheat package...'
+
+        $oldPreference = $ErrorActionPreference
+        try {
+            $ErrorActionPreference = 'Continue'
+            & $wingetPath install --id FACEITLTD.FACEITAC --exact --source winget `
+                --silent --accept-source-agreements --accept-package-agreements --disable-interactivity 2>&1 |
+                Out-Host
+            $code = $LASTEXITCODE
+        } finally {
+            $ErrorActionPreference = $oldPreference
+        }
+
+        # Publisher installer can spawn/chain child installers. Verify the intended
+        # Anti-Cheat state instead of trusting only WinGet's exit code.
+        $deadline = (Get-Date).AddSeconds(90)
+        while ((Get-Date) -lt $deadline -and -not (Test-FaceitPresent)) {
+            Start-Sleep -Seconds 2
+        }
+
+        if (-not (Test-FaceitPresent)) {
+            throw "FACEIT Anti-Cheat could not be verified after WinGet installation (exit $code)."
+        }
+
+        Write-Host '[FACEIT] Anti-Cheat verified present.'
+    } else {
+        Write-Host '[FACEIT] Anti-Cheat already present.'
+    }
+
+    # The publisher bootstrapper can chain the separate FACEIT platform client
+    # after the AC itself has already registered. Do not trust a single early
+    # check; enforce and observe the desired final state until it stays stable.
+    Enforce-FaceitACOnlyStable -wingetPath $wingetPath
+
+    Add-Record 'INSTALLED / VERIFIED' 'FACEIT Anti-Cheat present; separate FACEIT platform client absent after stabilization window'
 }
 
 function Invoke-SpotifyFromElevatedSession {
@@ -523,19 +858,90 @@ function Invoke-SpotifyFromElevatedSession {
     }
 }
 
-function New-WootilityShortcut {
-    $programs = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
-    $shortcut = Join-Path $programs 'Wootility Web.url'
+function New-UrlShortcut {
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Url
+    )
 
-    if (Test-WootilityShortcutPresent) {
-        Add-Record 'ALREADY PRESENT' $shortcut
+    $programs = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
+    $shortcut = Join-Path $programs ($Name + '.url')
+
+    New-Item -ItemType Directory -Path $programs -Force | Out-Null
+    "[InternetShortcut]`r`nURL=$Url`r`n" | Out-File -LiteralPath $shortcut -Encoding ASCII
+
+    if (-not (Test-Path -LiteralPath $shortcut -PathType Leaf)) {
+        throw "URL shortcut could not be created: $shortcut"
+    }
+
+    return $shortcut
+}
+
+function Open-UrlAsInteractiveUser {
+    param(
+        [Parameter(Mandatory)][string]$Url,
+        [Parameter(Mandatory)][string]$Label
+    )
+
+    # Post-format normally runs elevated. Use a temporary scheduled task with the
+    # same logged-in user at Limited integrity so the default browser launches in
+    # the normal desktop session instead of inheriting administrator elevation.
+    $user = [Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $taskName = 'PostFormat-OpenUrl-' + [guid]::NewGuid().ToString('N')
+    $taskCreated = $false
+
+    try {
+        $powershell = Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+        $escaped = $Url.Replace("'", "''")
+        $arguments = "-NoLogo -NoProfile -WindowStyle Hidden -Command `"Start-Process '$escaped'`""
+
+        $action = New-ScheduledTaskAction -Execute $powershell -Argument $arguments
+        $principal = New-ScheduledTaskPrincipal -UserId $user -LogonType Interactive -RunLevel Limited
+        $settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 2)
+
+        Register-ScheduledTask `
+            -TaskName $taskName `
+            -Action $action `
+            -Principal $principal `
+            -Settings $settings `
+            -Force `
+            -ErrorAction Stop | Out-Null
+
+        $taskCreated = $true
+        Start-ScheduledTask -TaskName $taskName -ErrorAction Stop
+        Start-Sleep -Seconds 3
+
+        $info = Get-ScheduledTaskInfo -TaskName $taskName -ErrorAction Stop
+        if ($info.LastTaskResult -notin @(0,267009)) {
+            throw "$Label browser-launch task returned $($info.LastTaskResult)."
+        }
+
+        Write-Host ("[OPENED] {0}: {1}" -f $Label,$Url) -ForegroundColor Green
+    }
+    finally {
+        if ($taskCreated) {
+            Unregister-ScheduledTask -TaskName $taskName -Confirm:$false -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+function Invoke-PeripheralSetupPages {
+    $wootilityUrl = 'https://v5.wootility.io/'
+    $logitechOmmUrl = 'https://support.logi.com/hc/en-us/articles/29742998779415-Onboard-Memory-Manager'
+
+    $wootShortcut = New-UrlShortcut -Name 'Wootility Web' -Url $wootilityUrl
+    $logitechShortcut = New-UrlShortcut -Name 'Logitech Onboard Memory Manager' -Url $logitechOmmUrl
+
+    if ($Preview) {
+        Add-Record 'PREVIEW' ("Would open Wootility Web + Logitech OMM and create shortcuts: $wootShortcut ; $logitechShortcut")
         return
     }
 
-    New-Item -ItemType Directory -Path $programs -Force | Out-Null
-    "[InternetShortcut]`r`nURL=https://wootility.io/`r`n" | Out-File -LiteralPath $shortcut -Encoding ASCII
-    if (-not (Test-WootilityShortcutPresent)) { throw 'Wootility Web shortcut could not be created or verified.' }
-    Add-Record 'CREATED' $shortcut
+    Open-UrlAsInteractiveUser -Url $wootilityUrl -Label 'Wootility Web'
+    Start-Sleep -Seconds 1
+    Open-UrlAsInteractiveUser -Url $logitechOmmUrl -Label 'Logitech Onboard Memory Manager'
+
+    Add-Record 'OPENED / SHORTCUTS CREATED' ("Wootility Web and Logitech OMM pages opened in the normal user session; shortcuts: $wootShortcut ; $logitechShortcut")
 }
 
 try {
@@ -585,8 +991,11 @@ try {
             switch ($step.Kind) {
                 'Winget' { Invoke-Winget $step $winget.Source }
                 'DirectX' { Invoke-DirectX }
+                'FaceitACOnly' { Invoke-FaceitACOnly $winget.Source }
+                'TeamSpeakClean' { Invoke-TeamSpeakClean }
+                'BundleGuard' { Invoke-BundleGuard $winget.Source }
                 'ExitLag' { Invoke-ExitLag }
-                'WootilityWeb' { New-WootilityShortcut }
+                'PeripheralPages' { Invoke-PeripheralSetupPages }
                 default { throw "Unknown step type: $($step.Kind)" }
             }
         }
@@ -607,11 +1016,12 @@ try {
             ''
         ) + $records.ToArray() + @(
             '',
-            'REV8 behavior: every step is checked before installation; already-present software is skipped.',
+            'REV12 behavior: every automated step is checked before installation; already-present software is skipped.',
             'Every installer attempt is also followed by a presence/version verification before the script continues.',
-            'Unversioned applications are install-only: REV8 does not upgrade them just because a newer version exists.',
-            'TeamSpeak remains pinned to 3.6.2.',
-            'A failed step stops the sequence. Read its install and check logs, fix it, then rerun the CMD.',
+            'Unversioned applications are install-only: REV12 does not upgrade them just because a newer version exists.',
+            'TeamSpeak remains pinned to 3.6.2 and is installed directly without the /Overwolf opt-in switch; Overwolf is forbidden by final-state verification.',
+            'Peripheral setup opens Wootility Web and the official Logitech Onboard Memory Manager page in the normal interactive user session and creates Start Menu URL shortcuts.',
+            'Automated application failures remain fail-closed. FACEIT is enforced to an AC-only final state with a stabilization window; Overwolf and the separate FACEIT platform client are forbidden final-state bundles. ExitLag remains manual/optional.',
             'No GPU drivers, RGB tools, debug tools, CS2 tweaks, CS2 or KovaaKs are installed here.'
         )
         $lines | Out-File -LiteralPath $report -Encoding UTF8

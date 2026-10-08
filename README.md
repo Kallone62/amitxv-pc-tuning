@@ -1,216 +1,120 @@
 # my-pc-optimization
 
-Personal, system-specific Windows / CS2 deployment and optimization repository for my own gaming PC.
+Personal, system-specific Windows 11 + CS2 baseline for my competitive PC. This is **not a generic tweak guide**: the scripts, validation rules and install order are built around the exact hardware and peripherals documented in [`SYSTEM.md`](SYSTEM.md).
 
-This is **not a generic tweak pack or public tuning guide**. Hardware identity, firmware, device topology, installed drivers, peripheral firmware/settings and the exact CS2/FACEIT workload are part of the baseline. A change belongs here only when it makes sense for this machine and can be reapplied deliberately.
+The optimization goal is lower and more consistent end-to-end latency without trading away frametime consistency, tail behavior, stability or reproducibility. A setting is kept because it has a defined job in this machine's chain, not because it is generically described as an “FPS tweak”.
 
-> Current platform: **Ryzen 7 9800X3D · ASUS ROG STRIX B850-I · 32 GB G.Skill DDR5 · RTX 3080 12 GB · Samsung 990 Pro · ZOWIE XL2566X+ 400 Hz**
+## Current machine
 
-Full hardware/peripheral context: [`SYSTEM.md`](SYSTEM.md)  
-Snapshot review and known gaps: [`VALIDATION.md`](VALIDATION.md)
+- AMD Ryzen 7 9800X3D
+- ASUS ROG STRIX B850-I GAMING WIFI
+- G.Skill F5-6400J3239G16GX2-TZ5RK, 2×16 GB (same physical Hynix A-die kit used on the previous platform; heatsinks removed)
+- MSI RTX 3080 12 GB LHR
+- Samsung 990 Pro 1 TB
+- BenQ XL2566X+
+- Logitech Superlight 2 DEX — 1600 DPI, 2000 Hz
+- Wooting 80HE
 
-## What this repository is for
+The old 13900KF + Z690 Tachyon BIOS material is preserved only under `.bios/legacy/Z690-Tachyon/`. It is not the active platform baseline.
 
-The repository is the reproducible setup layer for a dedicated competitive-CS2 machine. Its job is to make a clean Windows install converge toward the same known configuration without turning the setup into a pile of undocumented one-off tweaks.
+## Canonical 2026-10-08 baseline
 
-The focus is practical:
+The audited package baseline is the post-audit **r1** state:
 
-- reconstruct the machine after a clean format
-- install the intended driver set while avoiding unnecessary resident vendor software
-- apply the Windows / device / network policies used by this PC
-- preserve CS2, mouse, keyboard and KovaaK's reference configuration
-- keep post-update maintenance actions in one place
-- separate old-platform material from the current baseline
-- retain enough validation and rollback context that a later change can be evaluated rather than guessed
+- original submitted ZIP SHA-256: `1ddf469322ad763cf298abcb6fd271db5867df0be0e2f4c61e1cad6956a68ff5`
+- audited/corrected r1 ZIP SHA-256: `fc22d7d0d09aa602f645a8c446a1713dd4ab5e6469132d7d70678176bce0c2c5`
+- driver installer: **v2.3.6**
+- CS2 Gaming-Only baseline: **v1.0.9**
+- CS2 launcher: **REV14.8**
+- Intel I226-V baseline: **v2.4**
+- gaming-device power baseline: **v1.4**
+- post-format applications: **REV12**
+- policy baseline: **v1.2**
+- KovaaK CS2 standard: **V1 / package revision 1.0.2-current-cs2-crosshair-sync**
 
-The target is not “the highest tweak count”. The target is a repeatable system that remains responsive and consistent for CS2 while avoiding changes that are broad, unverified or hard to reverse.
+`FINAL_README.txt` is the compact deployment order. `FINAL_AUDIT.txt` records the package-level static/linkage audit. [`VALIDATION.md`](VALIDATION.md) explains what was actually verified and what still requires execution on the target Windows image.
 
-## Current hardware baseline
+## Clean-install order
 
-- **CPU:** AMD Ryzen 7 9800X3D
-- **Motherboard:** ASUS ROG STRIX B850-I GAMING WIFI
-- **Memory:** G.Skill F5-6400J3239G16GX2-TZ5RK, 2×16 GB DDR5, heatspreaders removed
-- **GPU:** MSI GeForce RTX 3080 12 GB LHR
-- **SSD:** Samsung 990 Pro 1 TB
-- **Cooling:** DeepCool LT720
-- **Case:** Lian Li LANCOOL III
-- **PSU:** FSP Hydro PTM PRO 1200W
-- **UPS:** Schneider Electric Easy UPS SRVS3KI
+1. From the existing Windows installation, run `00_Fresh_Install_W11_Pro.cmd`.
+2. Complete OOBE on the new Windows installation.
+3. If the clean image does not provide a usable inbox Intel I226-V LAN driver, bootstrap that Ethernet INF once so the online driver resolver can reach the vendor endpoints.
+4. Run `.drivers\Check_Gaming_Driver_Syntax.cmd`.
+5. Run `.drivers\Audit_Gaming_Drivers_v2.cmd`.
+6. Run `.drivers\Run_Gaming_Drivers_v2.cmd`.
+7. Reboot.
+8. Run `Run_CS2_Gaming_Scripts.cmd`.
+9. Run `Run_PostFormat_Apps.cmd`.
+10. Reboot before evaluating the final gaming state.
 
-The RAM is the same physical kit that was used on the previous 13900KF/Z690 Tachyon platform; old notes calling it only “Hynix A-Die 2×16” refer to this same kit.
+The syntax check and driver Audit are deliberately non-mutating. Install mode still performs its own six-step precheck before it changes a driver.
 
-## Competitive peripheral baseline
+## Layer ownership
 
-- **Monitor:** BenQ ZOWIE XL2566X+, 400 Hz
-- **Mouse:** Logitech G PRO X Superlight 2 DEX — 1600 DPI, 2000 Hz wireless, LOD High
-- **CS2 sensitivity:** `0.475`; zoom sensitivity ratio `0.9`
-- **Keyboard:** Wooting 80HE — 0.5 mm general actuation, 0.3 mm Ctrl/Shift, 0.1 mm WASD; Rapid Trigger 0.1 mm on WASD + Ctrl
-- **Headset:** Corsair HS80
-- **Mousepad:** SteelSeries QcK+
+### Fresh Windows deployment
 
-The submitted setup also included UI screenshots for CS2, Wooting and Logitech state. Their settings have been normalized into [`REFERENCE_STATE.md`](REFERENCE_STATE.md) so the repository stays diffable and Git-friendly. The original screenshot hashes and the submitted archive hash remain recorded for provenance.
+`00_Fresh_Install_W11_Pro.cmd` is deliberately specific to the tested image and target. It validates the hard-coded Windows 11 Pro WIM/index, quick-formats the configured `D:` target, applies the image with DISM, stages the offline Windows Update/PnP guard and `BypassNRO`, then copies the SSD Setup tree into the new Windows installation. It does not build or rewrite BCD/EFI state.
 
-## Repository layout
+### Driver layer — v2.3.6
 
-```text
-.
-├── .bios/
-│   ├── current/ROG-B850-I/       # current BIOS baseline (pending capture)
-│   └── legacy/Z690-Tachyon/      # old 13900KF/Tachyon AMISCE exports
-├── .drivers/
-│   ├── Assets/Monitor/           # fixed XL2566X+ WHQL monitor package
-│   ├── Install-Gaming-Drivers-v2-LatestOfficial.ps1
-│   ├── Run_Gaming_Drivers_v2.cmd
-│   └── README.txt
-├── .scripts/                     # Windows/device/network/application policy layers
-├── After Game Update/            # maintenance used after relevant game/driver updates
-├── Game/                         # CS2 autoexec
-├── Keyboard/                     # Wooting profile identifier
-├── Mouse/                        # reserved for mouse-specific deployable state
-├── Training/                     # KovaaK's CS2 standard + aim routine
-├── Run_CS2_Gaming_Scripts.cmd    # main gaming-baseline orchestrator
-├── Run_PostFormat_Apps.cmd       # selected app/runtime installer
-├── Test_WU_Driver_Scan_Once.cmd  # read-only Windows Update driver scan test
-├── SYSTEM.md
-├── REFERENCE_STATE.md
-└── VALIDATION.md
-```
+`.drivers/Install-Gaming-Drivers-v2-LatestOfficial.ps1` owns the clean-format vendor-driver baseline:
 
-## Deployment flow
+1. AMD B850 chipset
+2. Intel I226-V LAN
+3. Realtek UCM
+4. AMD iGPU driver-only
+5. NVIDIA RTX 3080 graphics driver-only
+6. ZOWIE XL2566X+ WHQL monitor package
 
-The package is intended to be used in layers rather than by randomly running every script.
+Important behavior:
 
-### 1. Clean Windows / platform prerequisites
+- exact target hardware/platform assertions are performed before install;
+- AMD's outer chipset wrapper exit code is diagnostic rather than sufficient proof of success — the target registered package version must verify;
+- INF-backed devices use direct devnode verification, including reboot-pending Code 14 handling and PnP rank diagnostics for real mismatches;
+- NVIDIA installs the graphics driver only; NVIDIA App and NVIDIA HD Audio are not selected;
+- NVIDIA Control Panel is installed and verified separately through its Microsoft Store HSA package;
+- the bundled ZOWIE package is pinned by SHA-256 and can be rescanned after the NVIDIA display stack binds.
 
-Start from the intended Windows 11 gaming install and establish the firmware/security state required by the current FACEIT setup. The main gaming baseline performs Secure Boot / TPM and related preflight checks and deliberately refuses several broad “latency tweak” classes.
+### Windows / CS2 baseline — v1.0.9 / REV14.8
 
-### 2. Drivers
+`Run_CS2_Gaming_Scripts.cmd` orchestrates the dedicated Windows/CS2 layers rather than hiding unrelated changes in one script. The active desktop-mouse baseline for the 1600-DPI setup is `MouseSensitivity=4`, `MouseSpeed=0`, `MouseThreshold1=0`, `MouseThreshold2=0`.
 
-Run:
+The baseline intentionally does **not** add HPET/BCD timer hacks, blanket service deletion, pagefile or memory-compression hacks, global interrupt-affinity/MSI hacks, or broad PCIe/network queue changes.
 
-```bat
-.drivers\Run_Gaming_Drivers_v2.cmd
-```
+### Intel I226-V — v2.4
 
-The driver workflow is hardware-specific. It verifies the B850-I / 9800X3D / RTX 3080 12 GB target before installation and resolves current official packages at runtime.
+The I226-V layer owns NIC power policy. EEE and Flow Control are disabled, supported DMA Coalescing / Reduce Speed On Power Down / Ultra Low Power controls are disabled when exposed, and the supported Windows/NDIS power-management path is comprehensively disabled. `AllowComputerToTurnOffDevice=Disabled` is separately forced and verified after the adapter restart.
 
-Its selected path covers:
+It intentionally leaves Interrupt Moderation, RSS, LSO/checksum offloads, Speed & Duplex and system-wide ASPM alone. There is no undocumented registry fallback if the supported NetAdapter interfaces fail.
 
-- AMD B850 chipset
-- Intel I226-V LAN from the ASUS board support package
-- Realtek UCM for the detected board device
-- AMD 9800X3D iGPU as driver-only where the package can be safely extracted
-- NVIDIA RTX 3080 Game Ready display driver with optional NVIDIA package components intentionally avoided
-- bundled ZOWIE XL2566X+ V001 WHQL monitor INF
+### Gaming-device power — v1.4
 
-The driver installer is designed around audit-before-mutation, exact-device/INF matching, vendor/hash/signature checks where available, refusal of automatic downgrades, and post-install binding verification. It does **not** use DDU or a blanket Driver Store purge.
+Only the audited Logitech LIGHTSPEED and Wooting USB functions are changed. USB root hubs, xHCI and unrelated HID devices remain stock. This layer does not configure I226-V a second time; it checks the I226 master state produced by the preceding NIC layer.
 
-The current driver layer is **v2.3.4 (review build)**. For a clean-format install it snapshots the pre-run Windows Update/PnP driver-policy state, applies a temporary guard while vendor drivers are resolved and bound, and restores those temporary values on both success and failure; interrupted runs retain a small recovery state for the next launch. AMD chipset success is judged by the registered package version rather than the outer wrapper exit code alone, PnP/NVIDIA binding gets a longer settle-and-verify window, and the ZOWIE monitor step can rescan after the NVIDIA display stack changes. `.drivers/Check_Gaming_Driver_Syntax.cmd` and `.drivers/Audit_Gaming_Drivers_v2.cmd` are the intended non-mutating checks before the real install.
+### Policy / security
 
-### 3. Post-format applications
+Windows Update freeze and read-only driver-scan behavior remain centralized in the policy layer. Defender's minimal-intervention preferences are applied only when Tamper Protection permits them; no Tamper Protection bypass is attempted.
 
-Preview first if desired:
+### Post-format applications — REV12
 
-```bat
-Run_PostFormat_Apps.cmd -Preview
-```
+Reruns skip already-satisfied applications. TeamSpeak 3.6.2 is installed from the pinned clean installer without the `/Overwolf` opt-in; Overwolf is a forbidden final-state component. FACEIT Anti-Cheat is kept while the separate FACEIT platform client is removed and the AC-only state is stabilized. ExitLag is optional/manual and does not abort the rest of the chain. Wootility Web and Logitech Onboard Memory Manager are opened in the normal user session and receive Start Menu shortcuts.
 
-Then install:
+## CS2 ↔ KovaaK synchronization
 
-```bat
-Run_PostFormat_Apps.cmd
-```
+`Game/autoexec.cfg` is the source of truth for CS2-specific values. The current baseline is:
 
-The application layer installs/verifies the selected Microsoft runtimes and the personal gaming-app set, including Chrome, AutoHotkey, FACEIT AC, Spotify, TeamSpeak, Steam and the other explicitly configured entries in `.scripts/Install-PostFormat-Apps.ps1`.
+- 1280×960 / 4:3 stretched
+- sensitivity `0.475`
+- zoom sensitivity ratio `0.9`
+- `fps_max 0`
+- static crosshair: style 4, **length 2, gap 0, thickness 2**, green RGBA `0/255/0/255`, reference screen height `960`
 
-### 4. Windows / device / network gaming baseline
+`Training/KOVAAKS_CS2_STANDARD_V1.zip` was re-synchronized during the final audit: its `Source-CS2-autoexec.cfg` is byte-identical to the root autoexec, its manifest uses the current values, and its 1280×960 crosshair asset follows the current CS2 pixel-unit crosshair rather than the older size-1/gap--4 snapshot.
 
-Run:
+## BIOS status
 
-```bat
-Run_CS2_Gaming_Scripts.cmd
-```
+The active 9800X3D + B850-I BIOS baseline is intentionally not fabricated from the old Tachyon material. `.bios/current/ROG-B850-I/` remains the place for the real captured/validated firmware state. Legacy Tachyon files are preserved separately for provenance only.
 
-This launcher coordinates the current Windows baseline modules. Important sublayers include:
+## Validation rule
 
-- `CS2-GamingOnly-Pro-v1.0.8.ps1` — dedicated Steam/CS2/FACEIT Windows baseline and preflight
-- `I226V_Baseline_v2.ps1` — I226-V power-saving/network-device baseline without blindly changing RSS/ITR/offload topology
-- `Gaming-Device-Disable-v2.ps1` — conservative allowlisted disable layer for explicitly unused endpoints, with restore state
-- `Gaming-Device-Power-Baseline-v1.ps1` — exact Logitech/Wooting function power settings plus narrow I226-V power controls
-- `Gaming-Background-Cleanup-v1.ps1` — selected updater/task background cleanup with restore support
-- `PostFormat-Policy-Baseline-v1.ps1` — Windows Update / security / file-intervention policy used by this dedicated image
-- `PostFormat-LowRisk-Background-v1.ps1` — low-risk background-feature policy
-- `PostFormat-App-Privacy-Capabilities-v1.ps1` — documented Windows app-capability policy layer
-- `WU-Driver-Scan-v1.ps1` — read-only Windows Update Agent driver search used by the policy workflow
-
-The main baseline explicitly avoids applying timer/BCD hacks, blanket service shutdowns, MSI/IRQ affinity tuning, C-state/core-parking changes, memory-manager hacks and similar broad modifications simply because they are popular “optimization” tweaks.
-
-## Game / input / training state
-
-### CS2
-
-`Game/autoexec.cfg` is the current text configuration snapshot. The submitted CS2 video screenshots were reviewed and their visible state is transcribed in [`REFERENCE_STATE.md`](REFERENCE_STATE.md), including 1280×960 fullscreen at 400 Hz and the captured advanced-video settings.
-
-### Mouse
-
-The submitted Logitech onboard-memory screenshot was reviewed and normalized into [`REFERENCE_STATE.md`](REFERENCE_STATE.md): active slot 1, 1600 DPI, High LOD, 1000 Hz wired and 2000 Hz wireless polling.
-
-### Keyboard
-
-`Keyboard/wootility.io.txt` preserves the Wootility profile identifier. The submitted Wooting screenshots were reviewed and their Tachyon/8K, actuation and Rapid Trigger state is normalized into [`REFERENCE_STATE.md`](REFERENCE_STATE.md).
-
-### KovaaK's
-
-`Training/KOVAAKS_CS2_STANDARD_V1.zip` is a self-contained, checksummed deployment package for the CS2-oriented KovaaK's profile. It includes its own backup/restore mechanism and internal verification. The package passed its own SHA-256 manifest check before this repository deployment.
-
-The root CS2 autoexec has evolved since that KovaaK package was generated, particularly around the crosshair block. This difference is recorded in [`VALIDATION.md`](VALIDATION.md) rather than silently rewriting either source.
-
-## After game/driver updates
-
-`After Game Update/shadercachereset.bat` clears selected NVIDIA and Windows DirectX shader-cache locations while leaving the top-level cache folders in place. Shader-cache clearing is not treated as a routine FPS “boost”; the script itself warns that rebuilding shaders can temporarily cause stutter on the first runs afterwards.
-
-## Safety and validation model
-
-This repository contains scripts that can change drivers, devices, Windows policies, Defender preferences and application state. It is personal infrastructure, not a recommendation for another PC.
-
-The current package favors several safety properties:
-
-- exact hardware checks where the action is hardware-dependent
-- audit/preview modes where practical
-- refusal to guess when multiple devices match
-- allowlists and hard exclusions for device operations
-- idempotent checks before repeating changes
-- post-change state verification rather than trusting installer exit codes alone
-- restore state for selected disable/background layers
-- no automatic use of legacy BIOS values on the new AMD platform
-
-A static review was completed before the first GitHub deployment; details and limits are in [`VALIDATION.md`](VALIDATION.md). Runtime success still has to be established on the real Windows installation because PnP ranking, firmware state, Windows policy behavior and current vendor packages cannot be proven from the repository alone.
-
-## BIOS state
-
-The current **9800X3D + ASUS ROG STRIX B850-I** BIOS baseline is the main unfinished layer.
-
-The two existing BIOS exports came from the previous **13900KF + Gigabyte Z690 Tachyon** platform. They are preserved under `.bios/legacy/Z690-Tachyon/` for comparison only and must not be treated as direct values for the current board.
-
-Once the B850-I baseline is captured, it should be added under `.bios/current/ROG-B850-I/` together with the exact BIOS/AGESA version and enough context to reproduce the validated state.
-
-## Change policy
-
-Future changes should be handled as system-specific experiments:
-
-1. define the intended gain and mechanism;
-2. change one meaningful variable at a time where possible;
-3. decide the acceptance metric before testing;
-4. compare under similar conditions;
-5. keep the change only if the benefit is repeatable without worsening stability or tail behavior;
-6. record the resulting working point so the next clean install can reproduce it.
-
-Subjective “feel” is useful as a hypothesis, but it is not a substitute for repeatable behavior. Average FPS alone is also not enough; frametime consistency, tail events, input behavior, networking and real-match stability matter to the final baseline.
-
-## Legacy platform
-
-For historical context, the prior platform was a Core i9-13900KF + Gigabyte Z690 Tachyon with the **same DDR5 kit**, RTX 3080, Samsung 990 Pro, GALAHAD 360, LANCOOL III and FSP Hydro PTM PRO. Only the CPU/motherboard/cooling platform context changed; the old BIOS exports are clearly segregated so they remain useful without contaminating the current configuration.
-
-## Personal profile
-
-Steam: https://steamcommunity.com/id/officialdescrip/
+A successful script exit is not automatically treated as proof of competitive improvement. Changes are evaluated against the previous known-good state with the smallest comparison that answers the question, and retained only when they preserve or improve responsiveness, frametime/tail consistency and stability. Subjective feel is treated as a testable hypothesis, not as proof.

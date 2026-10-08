@@ -13,9 +13,9 @@
       Wooting 80HE keyboard function
         USB\VID_31E3&PID_1402&MI_01\*
 
-    For Intel I226-V, only the supported NetAdapter settings below are managed:
-      - SelectiveSuspend -> Disabled
-      - DeviceSleepOnDisconnect -> Disabled
+    Intel I226-V power state is only verified here. The comprehensive I226
+    baseline that runs earlier owns the supported NetAdapter PM lockdown and
+    the master AllowComputerToTurnOffDevice state.
 
     Everything else remains stock:
       - USB Root Hubs
@@ -79,7 +79,7 @@ if ($needsDesktopPS -or $needs64Bit -or $needsElevation) {
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$ScriptVersion = '1.2'
+$ScriptVersion = '1.4'
 $LogRoot = Join-Path $env:ProgramData 'GamingDeviceBaseline\PowerBaseline'
 New-Item -ItemType Directory -Path $LogRoot -Force | Out-Null
 $LogFile = Join-Path $LogRoot ("device-power-baseline-{0:yyyyMMdd-HHmmss}.log" -f (Get-Date))
@@ -244,157 +244,27 @@ function Configure-I226Power {
 
     $nic = $adapters[0]
     $pm = Get-NetAdapterPowerManagement -Name $nic.Name -ErrorAction Stop
+    $master = [string]$pm.AllowComputerToTurnOffDevice
 
     Write-Host ("NIC         : {0} | {1}" -f $nic.Name,$nic.InterfaceDescription)
-    Write-Host ("SelectiveSuspend        : {0}" -f $pm.SelectiveSuspend)
-    Write-Host ("DeviceSleepOnDisconnect : {0}" -f $pm.DeviceSleepOnDisconnect)
-    Write-Host ("AllowComputerToTurnOff  : {0} (report only)" -f $pm.AllowComputerToTurnOffDevice)
-
-    $selectiveInitiallyEnabled = ([string]$pm.SelectiveSuspend -eq 'Enabled')
-    $sleepInitiallyEnabled = ([string]$pm.DeviceSleepOnDisconnect -eq 'Enabled')
-
-    # Prefer the standardized NDIS advanced property when the installed driver
-    # exposes it. Microsoft documents *SelectiveSuspend = 0 as Disabled and says
-    # the miniport must not advertise selective-suspend capability when it is 0.
-    $selectiveAdvanced = @(
-        Get-NetAdapterAdvancedProperty `
-            -Name $nic.Name `
-            -AllProperties `
-            -ErrorAction SilentlyContinue |
-        Where-Object {
-            [string]$_.RegistryKeyword -eq '*SelectiveSuspend'
-        }
-    )
-
-    if ($selectiveAdvanced.Count -gt 1) {
-        throw ("I226-V exposed {0} *SelectiveSuspend advanced properties; refusing ambiguous change." -f $selectiveAdvanced.Count)
-    }
-
-    if ($selectiveAdvanced.Count -eq 1) {
-        Write-Host ("Advanced *SelectiveSuspend : RegistryValue={0}; DisplayValue={1}" -f `
-            (($selectiveAdvanced[0].RegistryValue -join ',')),`
-            $selectiveAdvanced[0].DisplayValue)
-    }
-    else {
-        Write-Host 'Advanced *SelectiveSuspend : not exposed by current driver'
-    }
-
-    if ($Mode -eq 'Apply') {
-        if ($selectiveInitiallyEnabled) {
-            if ($selectiveAdvanced.Count -eq 1) {
-                Set-NetAdapterAdvancedProperty `
-                    -Name $nic.Name `
-                    -RegistryKeyword '*SelectiveSuspend' `
-                    -RegistryValue 0 `
-                    -AllProperties `
-                    -ErrorAction Stop | Out-Null
-
-                Write-Host '[APPLIED] I226-V standardized *SelectiveSuspend set to 0 (Disabled).'
-            }
-            else {
-                # Supported NDIS power-management interface fallback.
-                Disable-NetAdapterPowerManagement `
-                    -Name $nic.Name `
-                    -SelectiveSuspend `
-                    -ErrorAction Stop | Out-Null
-
-                Write-Host '[APPLIED] Requested I226-V SelectiveSuspend disable through NetAdapter power-management API.'
-            }
-
-            Start-Sleep -Seconds 3
-        }
-        else {
-            Write-Host '[UNCHANGED] I226-V SelectiveSuspend already disabled/unsupported.'
-        }
-
-        if ($sleepInitiallyEnabled) {
-            Disable-NetAdapterPowerManagement `
-                -Name $nic.Name `
-                -DeviceSleepOnDisconnect `
-                -ErrorAction Stop | Out-Null
-
-            Start-Sleep -Seconds 2
-            Write-Host '[APPLIED] I226-V DeviceSleepOnDisconnect disabled.'
-        }
-        elseif ([string]$pm.DeviceSleepOnDisconnect -eq 'Unsupported') {
-            Write-Host '[UNCHANGED] I226-V DeviceSleepOnDisconnect unsupported.'
-        }
-        else {
-            Write-Host '[UNCHANGED] I226-V DeviceSleepOnDisconnect already disabled.'
-        }
-    }
-    else {
-        if ($selectiveInitiallyEnabled) {
-            if ($selectiveAdvanced.Count -eq 1) {
-                Write-Host '[AUDIT] Would set standardized *SelectiveSuspend registry value to 0.'
-            }
-            else {
-                Write-Host '[AUDIT] Would request SelectiveSuspend disable through NetAdapter power-management API.'
-            }
-        }
-
-        if ($sleepInitiallyEnabled) {
-            Write-Host '[AUDIT] Would disable DeviceSleepOnDisconnect.'
-        }
-    }
-
-    $verify = Get-NetAdapterPowerManagement -Name $nic.Name -ErrorAction Stop
-
-    $advancedVerify = @(
-        Get-NetAdapterAdvancedProperty `
-            -Name $nic.Name `
-            -AllProperties `
-            -ErrorAction SilentlyContinue |
-        Where-Object {
-            [string]$_.RegistryKeyword -eq '*SelectiveSuspend'
-        }
-    )
-
-    $selectiveOk = ([string]$verify.SelectiveSuspend -in @('Disabled','Unsupported'))
-
-    # If the standardized keyword is explicitly 0, accept it as the configured
-    # disabled state even if this driver/build's power-management CIM view still
-    # reports the stale capability state. Log both views instead of escalating
-    # to undocumented registry edits.
-    $advancedSelectiveOff = $false
-    if ($advancedVerify.Count -eq 1) {
-        $registryValues = @($advancedVerify[0].RegistryValue) | ForEach-Object { [string]$_ }
-        $advancedSelectiveOff = ($registryValues -contains '0')
-    }
-
-    if (-not $selectiveOk -and $advancedSelectiveOff) {
-        Write-Warning 'Get-NetAdapterPowerManagement still reports SelectiveSuspend=Enabled, but documented *SelectiveSuspend is 0. Treating configured state as disabled.'
-        $selectiveOk = $true
-    }
-
-    $sleepDiscOk = ([string]$verify.DeviceSleepOnDisconnect -in @('Disabled','Unsupported'))
-
-    Write-Host ("Verified SelectiveSuspend        : {0}" -f $verify.SelectiveSuspend)
-    if ($advancedVerify.Count -eq 1) {
-        Write-Host ("Verified *SelectiveSuspend       : {0}" -f (($advancedVerify[0].RegistryValue -join ',')))
-    }
-    Write-Host ("Verified DeviceSleepOnDisconnect : {0}" -f $verify.DeviceSleepOnDisconnect)
-    Write-Host ("ARP Offload                      : {0} (stock)" -f $verify.ArpOffload)
-    Write-Host ("NS Offload                       : {0} (stock)" -f $verify.NSOffload)
-    Write-Host ("Wake on Magic Packet             : {0} (stock)" -f $verify.WakeOnMagicPacket)
-    Write-Host ("Wake on Pattern                  : {0} (stock)" -f $verify.WakeOnPattern)
+    Write-Host ("AllowComputerToTurnOff  : {0} (verification only)" -f $master)
+    Write-Host ("SelectiveSuspend        : {0} (report only)" -f $pm.SelectiveSuspend)
+    Write-Host ("DeviceSleepOnDisconnect : {0} (report only)" -f $pm.DeviceSleepOnDisconnect)
+    Write-Host ("ARP Offload             : {0} (stock/report only)" -f $pm.ArpOffload)
+    Write-Host ("NS Offload              : {0} (stock/report only)" -f $pm.NSOffload)
+    Write-Host ("Wake on Magic Packet    : {0} (stock/report only)" -f $pm.WakeOnMagicPacket)
+    Write-Host ("Wake on Pattern         : {0} (stock/report only)" -f $pm.WakeOnPattern)
     Write-Host ''
 
-    if ($Mode -eq 'Apply' -and (-not $selectiveOk -or -not $sleepDiscOk)) {
-        Write-Warning 'I226-V retained a supported power-management state after supported disable attempts. Leaving the driver state stock rather than forcing undocumented registry edits.'
-        return [pscustomobject]@{
-            Name          = $nic.Name
-            SelectiveOk   = $selectiveOk
-            SleepDiscOk   = $sleepDiscOk
-            Partial       = $true
-        }
+    if ($master -ne 'Disabled') {
+        Write-Warning ("I226-V master device-power state is {0}. The earlier I226 baseline owns this setting; no duplicate fallback is attempted here." -f $master)
     }
 
     return [pscustomobject]@{
-        Name          = $nic.Name
-        SelectiveOk   = $selectiveOk
-        SleepDiscOk   = $sleepDiscOk
-        Partial       = $false
+        Name       = $nic.Name
+        MasterOk   = ($master -eq 'Disabled')
+        Master     = $master
+        Partial    = ($master -ne 'Disabled')
     }
 }
 
@@ -439,16 +309,12 @@ try {
         ))
     }
 
-    Write-Host ("{0,-36} : {1}" -f 'Intel I226-V selective suspend',$(
-        if ($nicResult.SelectiveOk) { 'OFF/UNSUPPORTED' } else { 'CHECK' }
-    ))
-
-    Write-Host ("{0,-36} : {1}" -f 'I226-V sleep on disconnect',$(
-        if ($nicResult.SleepDiscOk) { 'OFF/UNSUPPORTED' } else { 'CHECK' }
+    Write-Host ("{0,-36} : {1}" -f 'I226-V allow device power-off',$(
+        if ($nicResult.MasterOk) { 'DISABLED' } else { 'CHECK EARLIER I226 STEP' }
     ))
 
     if ($nicResult.Partial) {
-        Write-Warning 'I226-V power state is PARTIAL; no undocumented fallback was used.'
+        Write-Warning 'I226-V master device-power state did not match the earlier targeted baseline; this verification layer made no duplicate NIC changes.'
     }
 
     Write-Host 'USB Root Hub / xHCI / HS80 / unrelated HID: STOCK'

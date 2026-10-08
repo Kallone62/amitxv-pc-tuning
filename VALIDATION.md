@@ -1,54 +1,61 @@
-# Snapshot validation
+# Validation
 
-Validation date: **2026-10-06**
+## 2026-10-08 consolidated audit
 
-Source archive SHA-256:
+The user-supplied package `SSD Setup - FINAL - 2026-10-08.zip` was treated as the candidate source baseline and independently re-audited before repository deployment.
 
-`266e2edc9a1d06edb6f4789770a7d4dc4ce49cde60f4e3bd7529285d73f2c5dc`
+Submitted package SHA-256:
 
-This repository snapshot was reviewed before deployment. The review distinguishes static/package validation from checks that can only be proven on the actual Windows machine.
+`1ddf469322ad763cf298abcb6fd271db5867df0be0e2f4c61e1cad6956a68ff5`
 
-## Passed static/package checks
+The audit found four package-linkage/documentation drifts that were corrected before deployment:
 
-- 32 source files were present in the submitted `SSD Setup` archive.
-- No obvious passwords, API keys, private keys, webhook URLs or user-profile absolute paths were found in the text/script scan.
-- All root launchers reference files that are present in the package.
-- Batch-file `goto` / local-label references resolve within their files.
-- The gaming driver installer explicitly preflights the current platform: ASUS ROG STRIX B850-I, Ryzen 7 9800X3D and NVIDIA PCI device `DEV_220A` for the RTX 3080 12 GB target.
-- The bundled ZOWIE XL2566X+ monitor archive hash is exactly the SHA-256 expected by `.drivers/README.txt` and the driver script: `E8B600BE155F85BA417BEE80EAE6065848885F9E72A331B19D17D53FD9751D38`.
-- ZOWIE still publishes the XL2566X+ V001 WHQL driver for Windows 10/11.
-- ASUS still publishes the B850-I support stack used by the driver's online resolver, including Intel I225/I226 LAN and Realtek UCM packages.
-- AMD's B850 chipset and Ryzen 7 9800X3D driver pages, NVIDIA's GeForce driver page, and the ASUS B850-I support page remain live official sources.
-- `Training/KOVAAKS_CS2_STANDARD_V1.zip` was extracted and every entry listed in its internal `SHA256SUMS.txt` passed verification.
+1. `.drivers/README.txt` referenced `Check_Gaming_Driver_Syntax.cmd` and `Audit_Gaming_Drivers_v2.cmd`, but those launchers were missing from the submitted ZIP. They were restored and updated for driver v2.3.6.
+2. `Run_CS2_Gaming_Scripts.cmd` declared REV14.8 but its end-of-file comment still said REV14.6. The stale footer was corrected.
+3. `.scripts/Gaming-Device-Disable-v2.ps1` had a restore example pointing to the nonexistent `Gaming-Device-Disable-Final.ps1`; it now points to itself.
+4. `Training/KOVAAKS_CS2_STANDARD_V1.zip` still carried the older CS2 size-1/gap--4/thickness-1 crosshair snapshot even though the root autoexec had moved to the current pixel-unit length-2/gap-0/thickness-2 state. The package source snapshot, manifest, asset, apply script and internal hashes were synchronized to the root autoexec.
 
-## Runtime validation still required on the target PC
+Corrected post-audit package SHA-256:
 
-Static review cannot prove Windows runtime behavior. The following are intentionally left to the actual machine:
+`fc22d7d0d09aa602f645a8c446a1713dd4ab5e6469132d7d70678176bce0c2c5`
 
-- PowerShell parsing/execution under 64-bit Windows PowerShell 5.1 and the installed Windows build
-- exact PnP instance IDs and driver binding/ranking after install
-- current vendor page HTML/API formats used by the online resolver
-- effective registry/policy state after reboot
-- device-disable safety against the live topology
-- FACEIT security/preflight state
-- frametime, DPC/ISR, network and input behavior after changes
+## Static/linkage checks completed
 
-The scripts already contain many preflight, audit, idempotency and post-change verification checks; those checks remain the authority during real deployment.
+- outer corrected package: 37 files, ZIP CRC clean;
+- all expected launchers/scripts present;
+- all CMD/BAT `goto` / `call` labels resolve;
+- all PowerShell files passed a lexical block-comment/string/here-string and delimiter-balance scan;
+- no duplicate custom PowerShell function definitions were found;
+- every custom function definition has at least one call site;
+- launchers reference existing PowerShell targets;
+- stale runtime markers for CS2 v1.0.8, PostFormat REV11, driver v2.3.4/v2.3.5 and launcher 14.6/14.7 are absent;
+- final runtime versions match v2.3.6 / v1.0.9 / REV14.8 / I226 v2.4 / device-power v1.4 / PostFormat REV12;
+- fresh-install launcher contains the expected D: format, WIM index 4/DISM apply, offline update/PnP guard and BypassNRO path, and contains no BCD/EFI mutation command;
+- the bundled XL2566X+ WHQL archive still hashes to `E8B600BE155F85BA417BEE80EAE6065848885F9E72A331B19D17D53FD9751D38`, matching the driver installer's pin;
+- KovaaK ZIP CRC passes and all 11 entries in its internal `SHA256SUMS.txt` verify;
+- KovaaK `Source-CS2-autoexec.cfg` is byte-identical to root `Game/autoexec.cfg` after the audit sync;
+- package PNG/JPG evidence assets decode successfully.
 
-## Known configuration drift — preserved, not silently “fixed”
+## Functional ownership checks
 
-The root `Game/autoexec.cfg` and the embedded KovaaK's standard are not identical snapshots.
+The scripts have a coherent ownership chain rather than competing global tweaks:
 
-The root CS2 autoexec currently uses a different crosshair block than the `KOVAAKS_CS2_STANDARD_V1` source snapshot. The KovaaK package still contains the older/source CS2 crosshair reconstruction (`size 1 / gap -4 / thickness 1` asset), while the root autoexec uses the newer visible block (`length 2 / gap 0 / thickness 2`, green custom RGB values).
+- fresh installer owns image application and offline first-boot policy staging;
+- driver installer owns the six hardware-driver steps;
+- CS2 launcher owns the ordered Windows/game baseline;
+- I226 v2.4 owns NIC power behavior;
+- gaming-device-power v1.4 owns only the exact audited Logitech/Wooting USB functions and reads, rather than reconfigures, the I226 master state;
+- policy v1.2 owns update/security policy and the read-only scheduled WU driver scan;
+- PostFormat REV12 owns the application layer.
 
-This mismatch is documented rather than rewritten because the archive itself does not establish which crosshair should overwrite the other. Sensitivity (`0.475`), zoom ratio (`0.9`), resolution (`1280×960`) and uncapped CS2 FPS remain aligned between the important source snapshots.
+## Windows runtime boundary
 
-## BIOS status
+This repository audit is not a substitute for execution on the target Windows 11 image. The Linux-side review cannot execute Windows PowerShell 5.1, SetupAPI/PnP, NetAdapter, WUA COM, AppX/winget or the actual vendor installers.
 
-The only BIOS files in the submitted archive were from the old Z690 Tachyon platform. They have been moved into `.bios/legacy/Z690-Tachyon/` without changing their content. The current 9800X3D / B850-I BIOS baseline is intentionally marked pending.
+Before the real driver install on the target PC, run:
 
-## Repository normalization of source screenshots
+1. `.drivers\Check_Gaming_Driver_Syntax.cmd`
+2. `.drivers\Audit_Gaming_Drivers_v2.cmd`
+3. `.drivers\Run_Gaming_Drivers_v2.cmd`
 
-The source archive contained seven non-executable JPG/PNG UI screenshots for CS2, Wooting and Logitech state. They were inspected during validation, but the GitHub repository stores their relevant visible settings in `REFERENCE_STATE.md` instead of committing the large binaries. Their original SHA-256 values are retained there, and the complete submitted archive is anchored by the source SHA-256 at the top of this file.
-
-This normalization does **not** modify the operational scripts, configuration files, legacy BIOS exports, bundled monitor-driver asset, or KovaaK's deployment package.
+The individual scripts also keep their own hard verification and fail/partial reporting. The remaining clean-image prerequisite is unchanged: if the target Windows image has no usable inbox I226-V networking, bootstrap the Ethernet INF once before the online driver resolver can operate.

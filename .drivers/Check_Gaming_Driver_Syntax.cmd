@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
-title Gaming Driver Installer v2.3.4 - Syntax Check
+title Gaming Driver Installer v2.3.6 - Syntax Check
 
 set "ROOT=%~dp0"
 set "DRIVER_SCRIPT=%ROOT%Install-Gaming-Drivers-v2-LatestOfficial.ps1"
@@ -25,7 +25,7 @@ if not exist "%POWERSHELL_EXE%" (
 )
 
 echo ============================================================
-echo   GAMING DRIVER INSTALLER v2.3.4 - POWERSHELL SYNTAX CHECK
+echo   GAMING DRIVER INSTALLER v2.3.6 - POWERSHELL SYNTAX CHECK
 echo ============================================================
 echo.
 "%POWERSHELL_EXE%" -NoLogo -NoProfile -ExecutionPolicy Bypass -Command ^

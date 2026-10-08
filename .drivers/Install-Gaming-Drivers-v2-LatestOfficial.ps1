@@ -16,9 +16,11 @@
       installed as matching display INF only (no Adrenalin UI). If Windows tar
       cannot read AMD's SFX archive, the script falls back to the latest ASUS
       motherboard OEM VGA ZIP and still installs only the matching display INF.
-    - NVIDIA RTX 3080 12GB (DEV_220A) latest WHQL Game Ready driver from NVIDIA,
+    - NVIDIA RTX 3080 12GB (DEV_220A) latest WHQL Game Ready display driver from NVIDIA,
       extracted before running the documented setup.exe Display.Driver-only
       installation (no NVIDIA App / HD Audio package selection)
+    - NVIDIA Control Panel HSA from Microsoft Store product 9NF8H0H7WMLT;
+      NVIDIA App remains intentionally uninstalled
 
   Intentionally NOT installed:
     - MediaTek Wi-Fi
@@ -104,7 +106,7 @@ $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $script:WebSession = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 
-$ScriptVersion = '2.3.4'
+$ScriptVersion = '2.3.6'
 $ScriptRoot = Split-Path -Parent $PSCommandPath
 $NvidiaTargetHardwareRegex = '^PCI\\VEN_10DE&DEV_220A(?:&|$)'
 
@@ -126,7 +128,6 @@ $Root = Join-Path $env:ProgramData 'GamingDriverInstaller'
 $DownloadRoot = Join-Path $Root 'Downloads'
 $ExtractRoot = Join-Path $Root 'Extracted'
 $LogRoot = Join-Path $Root 'Logs'
-$BootstrapGuardStatePath = Join-Path $Root 'DriverBootstrapGuardState.json'
 
 foreach ($dir in @($Root,$DownloadRoot,$ExtractRoot,$LogRoot)) {
     New-Item -ItemType Directory -Path $dir -Force | Out-Null
@@ -144,8 +145,6 @@ $script:VerifiedDownloads = @{}
 $script:StepResults = @()
 $script:OfficialPages = @{}
 $script:NvidiaLatest = $null
-$script:BootstrapGuardActive = $false
-$script:BootstrapGuardSnapshot = @()
 
 # ============================================================================
 # GENERIC HELPERS
@@ -423,6 +422,50 @@ function Get-SignedDriverForDevice {
     ) | Select-Object -First 1
 }
 
+function Get-DeviceDriverPropertyState {
+    param([Parameter(Mandatory)][string]$InstanceId)
+
+    $result = [ordered]@{
+        Provider = ''
+        Version  = ''
+        InfPath  = ''
+    }
+
+    foreach ($entry in @(
+        @{ Name = 'Provider'; Key = 'DEVPKEY_Device_DriverProvider' },
+        @{ Name = 'Version';  Key = 'DEVPKEY_Device_DriverVersion' },
+        @{ Name = 'InfPath';  Key = 'DEVPKEY_Device_DriverInfPath' }
+    )) {
+        try {
+            $p = Get-PnpDeviceProperty -InstanceId $InstanceId -KeyName $entry.Key -ErrorAction Stop
+            if ($null -ne $p -and $null -ne $p.Data) {
+                $result[$entry.Name] = [string]$p.Data
+            }
+        }
+        catch {
+            # Win32_PnPSignedDriver fallback below remains available.
+        }
+    }
+
+    return [pscustomobject]$result
+}
+
+function Write-PnpRankDiagnostics {
+    param([Parameter(Mandatory)][string]$InstanceId)
+
+    Write-Host '[DIAGNOSTIC] Matching drivers / rank for device:' -ForegroundColor Yellow
+    Write-Host ("             {0}" -f $InstanceId) -ForegroundColor Yellow
+    try {
+        $diag = & "$env:windir\System32\pnputil.exe" /enum-devices /instanceid "$InstanceId" /drivers 2>&1
+        foreach ($line in @($diag)) {
+            Write-Host ('             {0}' -f [string]$line)
+        }
+    }
+    catch {
+        Write-Warning ("PnP rank diagnostic failed: {0}" -f $_.Exception.Message)
+    }
+}
+
 function Get-PresentDeviceByHardwareRegex {
     param(
         [Parameter(Mandatory)][string]$HardwareRegex,
@@ -621,19 +664,20 @@ function Invoke-PnpInstall {
         Write-Host ('          {0}' -f [string]$line)
     }
 
-    if ($rc -ne 0) {
+    # PnPUtil documents 3010 as successful installation requiring reboot.
+    if ($rc -notin @(0,3010)) {
         throw "PnPUtil failed for '$DisplayName' (exit $rc)."
     }
     $script:RebootRecommended = $true
 
-    # Exit 0 can mean the INF was only staged: Windows still applies PnP
-    # ranking. Never report success until the intended device is bound. Fresh
-    # Windows can take longer than a few seconds to settle device state, so give
-    # SetupAPI/PnP up to one minute before declaring a binding failure.
+    # Verify the actual devnode, not only Win32_PnPSignedDriver. Fresh installs
+    # can update the unified device properties before CIM catches up.
     Invoke-PnpRescanBestEffort
+    $state = $null
     for ($attempt = 1; $attempt -le 30; $attempt++) {
         $state = Test-PreInstallExact -DeviceRecord $DeviceRecord `
             -TargetInf $TargetInf -ExpectedProviderRegex $ExpectedProviderRegex -Quiet
+
         if ($state.Exact) {
             Write-Host ("[VERIFIED] {0}: {1} / {2} / {3}" -f
                 $DeviceRecord.Device.InstanceId,$state.InstalledProvider,
@@ -641,9 +685,31 @@ function Invoke-PnpInstall {
             $script:Installed++
             return
         }
+
+        # Code 14 is CM_PROB_NEED_RESTART. If provider/version are already the
+        # exact target, installation is verified and only activation is pending.
+        if ($state.PendingRestart) {
+            Write-Host ("[VERIFIED / PENDING REBOOT] {0}: {1} / {2} / {3} / problem code 14" -f
+                $DeviceRecord.Device.InstanceId,$state.InstalledProvider,
+                $state.InstalledVersion,$state.InstalledInf) -ForegroundColor Yellow
+            $script:Installed++
+            $script:RebootRecommended = $true
+            return
+        }
+
         if ($attempt -lt 30) { Start-Sleep -Seconds 2 }
     }
-    throw "PnPUtil completed, but '$DisplayName' did not bind to the expected device/driver within 60 seconds. Check PnP ranking or reboot and audit; no successful install is claimed."
+
+    if ($null -ne $state) {
+        Write-Host ("[FINAL DEVICE STATE] provider={0}; version={1}; inf={2}; problem={3}" -f
+            $(if ($state.InstalledProvider) {$state.InstalledProvider} else {'NONE'}),
+            $(if ($state.InstalledVersion) {$state.InstalledVersion} else {'NONE'}),
+            $(if ($state.InstalledInf) {$state.InstalledInf} else {'NONE'}),
+            $(if ($null -eq $state.ProblemCode) {'N/A'} else {$state.ProblemCode})) -ForegroundColor Yellow
+    }
+
+    Write-PnpRankDiagnostics -InstanceId ([string]$DeviceRecord.Device.InstanceId)
+    throw "PnPUtil completed, but '$DisplayName' did not reach a verified target binding within 60 seconds. No successful install is claimed."
 }
 
 function Test-PreInstallExact {
@@ -655,11 +721,16 @@ function Test-PreInstallExact {
     )
 
     $dev = $DeviceRecord.Device
+
+    # Prefer the unified devnode properties because they represent the driver
+    # currently installed on this device instance and update more directly
+    # during PnP transitions. Fall back to Win32_PnPSignedDriver when needed.
+    $direct = Get-DeviceDriverPropertyState -InstanceId ([string]$dev.InstanceId)
     $installed = Get-SignedDriverForDevice -InstanceId ([string]$dev.InstanceId)
 
-    $installedProvider = if ($installed) { [string]$installed.DriverProviderName } else { '' }
-    $installedVersion  = if ($installed) { [string]$installed.DriverVersion } else { '' }
-    $installedInf      = if ($installed) { [string]$installed.InfName } else { '' }
+    $installedProvider = if ($direct.Provider) { [string]$direct.Provider } elseif ($installed) { [string]$installed.DriverProviderName } else { '' }
+    $installedVersion  = if ($direct.Version)  { [string]$direct.Version  } elseif ($installed) { [string]$installed.DriverVersion } else { '' }
+    $installedInf      = if ($direct.InfPath)  { [string]$direct.InfPath  } elseif ($installed) { [string]$installed.InfName } else { '' }
     $problemCode       = Get-ProblemCode -InstanceId ([string]$dev.InstanceId)
 
     if (-not $Quiet) {
@@ -701,10 +772,14 @@ function Test-PreInstallExact {
         $versionComparison = Compare-VersionText -Installed $installedVersion -Target $TargetInf.Version
         $versionExact = ($null -ne $versionComparison -and $versionComparison -eq 0)
     }
+    $bindingExact = ($providerExact -and $versionExact)
     $healthy = ($null -ne $problemCode -and $problemCode -eq 0)
+    $pendingRestart = ($bindingExact -and $problemCode -eq 14)
 
     return [pscustomobject]@{
-        Exact             = ($providerExact -and $versionExact -and $healthy)
+        Exact             = ($bindingExact -and $healthy)
+        BindingExact      = $bindingExact
+        PendingRestart    = $pendingRestart
         InstalledProvider = $installedProvider
         InstalledVersion  = $installedVersion
         InstalledInf      = $installedInf
@@ -716,161 +791,27 @@ function Test-PreInstallExact {
 # FRESH-INSTALL WINDOWS UPDATE / DRIVER GUARD
 # ============================================================================
 
-function Get-BootstrapRegistryDwordSnapshot {
-    param(
-        [Parameter(Mandatory)][string]$Path,
-        [Parameter(Mandatory)][string]$Name
-    )
-
-    if (-not (Test-Path -LiteralPath $Path)) {
-        return [pscustomobject]@{
-            Path = $Path; Name = $Name; Exists = $false; Value = $null
-        }
-    }
-
-    $props = Get-ItemProperty -LiteralPath $Path -ErrorAction Stop
-    $property = $props.PSObject.Properties[$Name]
-    if ($null -eq $property) {
-        return [pscustomobject]@{
-            Path = $Path; Name = $Name; Exists = $false; Value = $null
-        }
-    }
-
-    $key = Get-Item -LiteralPath $Path -ErrorAction Stop
-    $kind = $key.GetValueKind($Name)
-    if ($kind -ne [Microsoft.Win32.RegistryValueKind]::DWord) {
-        throw "Refusing to overwrite non-DWORD bootstrap policy '$Path\\$Name' (type: $kind)."
-    }
-
-    return [pscustomobject]@{
-        Path = $Path; Name = $Name; Exists = $true; Value = [int]$property.Value
-    }
-}
-
-function Set-BootstrapRegistryDword {
-    param(
-        [Parameter(Mandatory)][string]$Path,
-        [Parameter(Mandatory)][string]$Name,
-        [Parameter(Mandatory)][int]$Value
-    )
-
-    New-Item -Path $Path -Force | Out-Null
-    New-ItemProperty -Path $Path -Name $Name -PropertyType DWord -Value $Value -Force | Out-Null
-}
-
-function Save-DriverBootstrapSnapshot {
-    param([Parameter(Mandatory)][object[]]$Snapshot)
-
-    $Snapshot |
-        ConvertTo-Json -Depth 4 |
-        Set-Content -LiteralPath $BootstrapGuardStatePath -Encoding UTF8 -Force -ErrorAction Stop
-}
-
-function Read-DriverBootstrapSnapshot {
-    if (-not (Test-Path -LiteralPath $BootstrapGuardStatePath)) {
-        return @()
-    }
-
-    $raw = Get-Content -LiteralPath $BootstrapGuardStatePath -Raw -ErrorAction Stop
-    if ([string]::IsNullOrWhiteSpace($raw)) {
-        throw "Bootstrap guard state file is empty: $BootstrapGuardStatePath"
-    }
-
-    return @(ConvertFrom-Json -InputObject $raw -ErrorAction Stop)
-}
-
-function Test-BootstrapSnapshotEntry {
-    param([Parameter(Mandatory)]$Entry)
-
-    $current = Get-BootstrapRegistryDwordSnapshot -Path ([string]$Entry.Path) -Name ([string]$Entry.Name)
-    if ([bool]$Entry.Exists) {
-        return ($current.Exists -and [int]$current.Value -eq [int]$Entry.Value)
-    }
-    return (-not $current.Exists)
-}
-
-function Restore-DriverBootstrapGuard {
-    param([string]$Reason = 'cleanup')
-
-    $snapshot = @($script:BootstrapGuardSnapshot)
-    if ($snapshot.Count -eq 0) {
-        $snapshot = @(Read-DriverBootstrapSnapshot)
-    }
-    if ($snapshot.Count -eq 0) {
-        throw 'No saved driver-bootstrap policy snapshot is available for restoration.'
-    }
-
-    foreach ($entry in $snapshot) {
-        $path = [string]$entry.Path
-        $name = [string]$entry.Name
-        if ([bool]$entry.Exists) {
-            Set-BootstrapRegistryDword -Path $path -Name $name -Value ([int]$entry.Value)
-        }
-        elseif (Test-Path -LiteralPath $path) {
-            Remove-ItemProperty -LiteralPath $path -Name $name -ErrorAction SilentlyContinue
-        }
-    }
-
-    $bad = @($snapshot | Where-Object { -not (Test-BootstrapSnapshotEntry -Entry $_) })
-    if ($bad.Count -gt 0) {
-        $names = ($bad | ForEach-Object { "{0}\\{1}" -f $_.Path,$_.Name }) -join ', '
-        throw "Temporary driver-bootstrap policies did not restore to their pre-run state: $names"
-    }
-
-    Remove-Item -LiteralPath $BootstrapGuardStatePath -Force -ErrorAction SilentlyContinue
-    $script:BootstrapGuardActive = $false
-    $script:BootstrapGuardSnapshot = @()
-    Write-Host ("[RESTORED] Temporary Windows Update / PnP driver policies ({0})." -f $Reason) -ForegroundColor Green
-}
-
-function Recover-StaleDriverBootstrapGuard {
-    if (-not (Test-Path -LiteralPath $BootstrapGuardStatePath)) {
-        return
-    }
-
-    Write-Warning "A previous driver-bootstrap guard state file was found. Restoring the saved pre-run driver policies before continuing: $BootstrapGuardStatePath"
-    $script:BootstrapGuardSnapshot = @(Read-DriverBootstrapSnapshot)
-    $script:BootstrapGuardActive = $true
-    Restore-DriverBootstrapGuard -Reason 'stale-state recovery'
-}
-
 function Ensure-DriverBootstrapGuard {
     # This is intentionally policy-only. Windows Update / BITS / servicing
     # services are left at their stock topology. The guard exists only to stop
     # Windows Update / PnP from racing the vendor-driver baseline while large
     # official packages are being downloaded and inspected.
-    #
-    # The three driver-specific values are temporary and are snapshotted before
-    # mutation. They are restored to their exact pre-run state after success OR
-    # failure. NoAutoUpdate=1 is intentionally retained as part of this PC's
-    # separate update policy baseline.
     $wuPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
     $wuAuPath = Join-Path $wuPath 'AU'
     $driverSearchPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DriverSearching'
-
-    Recover-StaleDriverBootstrapGuard
 
     foreach ($path in @($wuPath,$wuAuPath,$driverSearchPath)) {
         New-Item -Path $path -Force | Out-Null
     }
 
-    $script:BootstrapGuardSnapshot = @(
-        Get-BootstrapRegistryDwordSnapshot -Path $wuPath -Name 'ExcludeWUDriversInQualityUpdate'
-        Get-BootstrapRegistryDwordSnapshot -Path $driverSearchPath -Name 'SearchOrderConfig'
-        Get-BootstrapRegistryDwordSnapshot -Path $driverSearchPath -Name 'DontSearchWindowsUpdate'
-    )
-    Save-DriverBootstrapSnapshot -Snapshot $script:BootstrapGuardSnapshot
-    $script:BootstrapGuardActive = $true
+    New-ItemProperty -Path $wuAuPath -Name 'NoAutoUpdate' -PropertyType DWord -Value 1 -Force | Out-Null
+    New-ItemProperty -Path $wuPath -Name 'ExcludeWUDriversInQualityUpdate' -PropertyType DWord -Value 1 -Force | Out-Null
 
-    Set-BootstrapRegistryDword -Path $wuAuPath -Name 'NoAutoUpdate' -Value 1
-    Set-BootstrapRegistryDword -Path $wuPath -Name 'ExcludeWUDriversInQualityUpdate' -Value 1
-
-    # Microsoft maps both policies below to
-    # Software\Policies\Microsoft\Windows\DriverSearching. SearchOrderConfig=0
-    # selects "Do not search Windows Update"; DontSearchWindowsUpdate=1 is the
-    # older policy kept during bootstrap for compatibility with older components.
-    Set-BootstrapRegistryDword -Path $driverSearchPath -Name 'SearchOrderConfig' -Value 0
-    Set-BootstrapRegistryDword -Path $driverSearchPath -Name 'DontSearchWindowsUpdate' -Value 1
+    # SearchOrderConfig=0 is the current "do not search Windows Update" device
+    # driver source-order policy. Keep the older DontSearchWindowsUpdate value
+    # during bootstrap too, because older inbox components can still consult it.
+    New-ItemProperty -Path $driverSearchPath -Name 'SearchOrderConfig' -PropertyType DWord -Value 0 -Force | Out-Null
+    New-ItemProperty -Path $driverSearchPath -Name 'DontSearchWindowsUpdate' -PropertyType DWord -Value 1 -Force | Out-Null
 
     $noAuto = (Get-ItemProperty -Path $wuAuPath -Name 'NoAutoUpdate' -ErrorAction Stop).NoAutoUpdate
     $exclude = (Get-ItemProperty -Path $wuPath -Name 'ExcludeWUDriversInQualityUpdate' -ErrorAction Stop).ExcludeWUDriversInQualityUpdate
@@ -884,17 +825,40 @@ function Ensure-DriverBootstrapGuard {
     Write-Host '[BOOTSTRAP GUARD] Automatic Windows Update disabled.' -ForegroundColor Green
     Write-Host '[BOOTSTRAP GUARD] Windows Update driver delivery excluded.' -ForegroundColor Green
     Write-Host '[BOOTSTRAP GUARD] PnP Windows Update driver search blocked.' -ForegroundColor Green
-    Write-Host ("[BOOTSTRAP GUARD] Pre-run driver policy state saved: {0}" -f $BootstrapGuardStatePath)
 }
 
 function Finalize-DriverBootstrapGuard {
-    # Only called after ALL selected driver steps have succeeded. Restore the
-    # temporary driver-specific values to exactly what existed before this run.
-    # Automatic Windows Update remains disabled by design.
-    $wuAuPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate\AU'
+    # Only called after ALL selected driver steps have succeeded. Automatic
+    # Windows Update remains disabled; only the temporary driver-specific
+    # exclusion/search blocks are removed so the explicit read-only catalog
+    # scan used by the final policy baseline can see driver candidates again.
+    $wuPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+    $wuAuPath = Join-Path $wuPath 'AU'
+    $driverSearchPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\DriverSearching'
 
     Write-Section 'FINALIZE DRIVER BOOTSTRAP'
-    Restore-DriverBootstrapGuard -Reason 'successful 6/6 verification'
+
+    Remove-ItemProperty -Path $wuPath -Name 'ExcludeWUDriversInQualityUpdate' -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $driverSearchPath -Name 'SearchOrderConfig' -ErrorAction SilentlyContinue
+    Remove-ItemProperty -Path $driverSearchPath -Name 'DontSearchWindowsUpdate' -ErrorAction SilentlyContinue
+
+    $excludeStillThere = $false
+    $searchStillThere = $false
+    $legacyStillThere = $false
+
+    if (Test-Path -LiteralPath $wuPath) {
+        $props = Get-ItemProperty -Path $wuPath -ErrorAction Stop
+        $excludeStillThere = ($null -ne $props.PSObject.Properties['ExcludeWUDriversInQualityUpdate'])
+    }
+    if (Test-Path -LiteralPath $driverSearchPath) {
+        $props = Get-ItemProperty -Path $driverSearchPath -ErrorAction Stop
+        $searchStillThere = ($null -ne $props.PSObject.Properties['SearchOrderConfig'])
+        $legacyStillThere = ($null -ne $props.PSObject.Properties['DontSearchWindowsUpdate'])
+    }
+
+    if ($excludeStillThere -or $searchStillThere -or $legacyStillThere) {
+        throw 'Temporary driver bootstrap policies could not be removed after successful driver verification.'
+    }
 
     $noAuto = $null
     if (Test-Path -LiteralPath $wuAuPath) {
@@ -904,11 +868,9 @@ function Finalize-DriverBootstrapGuard {
         }
     }
 
-    if ($noAuto -ne 1) {
-        throw 'NoAutoUpdate=1 was expected to remain enabled after driver bootstrap finalization.'
-    }
-
-    Write-Host '[KEPT] Automatic Windows Update disabled (NoAutoUpdate=1).' -ForegroundColor Green
+    Write-Host '[REMOVED] Temporary Windows Update driver exclusion.' -ForegroundColor Green
+    Write-Host '[REMOVED] Temporary PnP Windows Update search blocks.' -ForegroundColor Green
+    Write-Host ("[KEPT] Automatic Windows Update policy: {0}" -f $(if ($noAuto -eq 1) {'disabled (NoAutoUpdate=1)'} else {'not configured by this finalizer'}))
 }
 
 function Invoke-PnpRescanBestEffort {
@@ -1589,8 +1551,57 @@ function Convert-NvidiaInstalledToMarketingVersion {
     }
 }
 
+function Test-NvidiaControlPanelPresent {
+    return ($null -ne (Get-AppxPackage -Name 'NVIDIACorp.NVIDIAControlPanel' -ErrorAction SilentlyContinue | Select-Object -First 1))
+}
+
+function Ensure-NvidiaControlPanel {
+    if (Test-NvidiaControlPanelPresent) {
+        Write-Host '[OK] NVIDIA Control Panel Store app is already installed.' -ForegroundColor Green
+        return
+    }
+
+    if ($Mode -eq 'Audit') {
+        Write-Host '[WOULD INSTALL] NVIDIA Control Panel from Microsoft Store (9NF8H0H7WMLT).' -ForegroundColor Yellow
+        return
+    }
+
+    $winget = Get-Command winget.exe -ErrorAction SilentlyContinue
+    if (-not $winget) {
+        throw 'NVIDIA display driver is installed, but WinGet is unavailable so the NVIDIA Control Panel Store app could not be installed.'
+    }
+
+    Write-Host '[INSTALL] NVIDIA Control Panel from Microsoft Store (9NF8H0H7WMLT)...'
+    $oldPreference = $ErrorActionPreference
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $winget.Source install `
+            --id 9NF8H0H7WMLT `
+            --exact `
+            --source msstore `
+            --accept-source-agreements `
+            --accept-package-agreements `
+            --disable-interactivity 2>&1 |
+            ForEach-Object { Write-Host ('          {0}' -f [string]$_) }
+        $rc = $LASTEXITCODE
+    }
+    finally {
+        $ErrorActionPreference = $oldPreference
+    }
+
+    for ($attempt = 1; $attempt -le 30; $attempt++) {
+        if (Test-NvidiaControlPanelPresent) {
+            Write-Host '[VERIFIED] NVIDIA Control Panel Store app is installed.' -ForegroundColor Green
+            return
+        }
+        if ($attempt -lt 30) { Start-Sleep -Seconds 2 }
+    }
+
+    throw "NVIDIA Control Panel Store installation did not verify within 60 seconds (WinGet exit $rc). Display driver state is unchanged."
+}
+
 function Install-NvidiaGameReady {
-    Write-Section '5/6 NVIDIA RTX 3080 12GB - GAME READY DISPLAY DRIVER ONLY'
+    Write-Section '5/6 NVIDIA RTX 3080 12GB - GAME READY DISPLAY DRIVER + CONTROL PANEL'
 
     $devices = @(Get-PresentDeviceByHardwareRegex -HardwareRegex $NvidiaTargetHardwareRegex)
     if ($devices.Count -eq 0) {
@@ -1619,6 +1630,7 @@ function Install-NvidiaGameReady {
 
     if ($allExact) {
         Write-Host '[SKIP] Exact current NVIDIA Game Ready version already bound.' -ForegroundColor Green
+        Ensure-NvidiaControlPanel
         $script:Skipped += $devices.Count
         return
     }
@@ -1631,6 +1643,7 @@ function Install-NvidiaGameReady {
                 $cmp = Compare-VersionText -Installed $marketing -Target $latest.Version
                 if ($null -ne $cmp -and $cmp -gt 0) {
                     Write-Warning "Installed NVIDIA version $marketing is newer than NVIDIA current lookup $($latest.Version). No downgrade attempted."
+                    Ensure-NvidiaControlPanel
                     $script:Skipped++
                     return
                 }
@@ -1655,7 +1668,8 @@ function Install-NvidiaGameReady {
     Assert-AuthenticodePublisher -Path $setups[0].FullName -PublisherRegex '(?i)NVIDIA'
 
     if ($Mode -eq 'Audit') {
-        Write-Host '[WOULD INSTALL] NVIDIA WHQL Game Ready; signed archive and setup verified.' -ForegroundColor Yellow
+        Write-Host '[WOULD INSTALL] NVIDIA WHQL Game Ready display driver; signed archive and setup verified.' -ForegroundColor Yellow
+        Ensure-NvidiaControlPanel
         $script:WouldInstall++
         return
     }
@@ -1702,6 +1716,7 @@ function Install-NvidiaGameReady {
         throw 'NVIDIA setup completed, but the expected Game Ready driver was not verified as bound within 60 seconds. Reboot and audit before claiming success.'
     }
     Write-Host ("[VERIFIED] NVIDIA RTX 3080 Game Ready {0} is bound." -f $latest.Version)
+    Ensure-NvidiaControlPanel
     $script:Installed++
     $script:RebootRecommended = $true
 }
@@ -1986,15 +2001,5 @@ catch {
     exit 1
 }
 finally {
-    if ($script:BootstrapGuardActive) {
-        try {
-            Write-Warning 'Driver install did not reach normal bootstrap finalization. Restoring the pre-run temporary driver policies now.'
-            Restore-DriverBootstrapGuard -Reason 'failure/incomplete-run cleanup'
-        }
-        catch {
-            Write-Warning ("BOOTSTRAP CLEANUP FAILED: {0}" -f $_.Exception.Message)
-            Write-Warning ("Saved recovery state retained at: {0}" -f $BootstrapGuardStatePath)
-        }
-    }
     try { Stop-Transcript | Out-Null } catch {}
 }

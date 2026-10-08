@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
-title Post-Format Application Installer - Revision 8
+title Post-Format Application Installer - Revision 12
 
 for %%I in ("%~dp0.") do set "PACK_ROOT=%%~fI"
 set "APP_SCRIPT=%PACK_ROOT%\.scripts\Install-PostFormat-Apps.ps1"
@@ -15,7 +15,7 @@ set "RUN_MODE=INSTALL"
 set "APP_SWITCH="
 
 echo ============================================================
-echo   POST-FORMAT APPLICATION INSTALLER - REVISION 8
+echo   POST-FORMAT APPLICATION INSTALLER - REVISION 12
 echo ============================================================
 echo Launcher     : "%~f0"
 echo Script       : "%APP_SCRIPT%"
@@ -65,7 +65,7 @@ set "RESULT=0"
 
 :REPORT
 set "FINISHED=%DATE% %TIME%"
->"%REPORT%" echo Post-Format Application Installer - Revision 8
+>"%REPORT%" echo Post-Format Application Installer - Revision 12
 >>"%REPORT%" echo Started: %STARTED%
 >>"%REPORT%" echo Finished: %FINISHED%
 >>"%REPORT%" echo Script: "%APP_SCRIPT%"

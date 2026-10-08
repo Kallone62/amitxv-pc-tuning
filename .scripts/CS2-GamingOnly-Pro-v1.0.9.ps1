@@ -93,7 +93,7 @@ if ($NeedsWindowsPowerShell -or $Needs64Bit -or $NeedsElevation) {
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
-$ScriptVersion = '1.0.8'
+$ScriptVersion = '1.0.9'
 $TargetWorkload = 'Steam / Counter-Strike 2 / FACEIT Anti-Cheat'
 
 
@@ -1291,10 +1291,17 @@ try {
     # 07 - INPUT
     # ========================================================================
 
+    # 1600-DPI desktop baseline:
+    # MouseSensitivity=4 corresponds to the classic 3/11 pointer-speed step,
+    # giving roughly 0.25x desktop scaling versus the neutral/default 6/11 step.
+    # This preserves the intended 400-DPI @ neutral Windows desktop feel while
+    # the physical mouse runs at 1600 DPI. CS2 sensitivity remains game-side.
+    Set-RegistryString -Path 'HKCU:\Control Panel\Mouse' -Name 'MouseSensitivity' -Value '4'
+
     # Disable Windows pointer acceleration / Enhance Pointer Precision.
-    Set-RegistryString -Path 'HKCU:\Control Panel\Mouse' -Name 'MouseSpeed'      -Value '0'
-    Set-RegistryString -Path 'HKCU:\Control Panel\Mouse' -Name 'MouseThreshold1' -Value '0'
-    Set-RegistryString -Path 'HKCU:\Control Panel\Mouse' -Name 'MouseThreshold2' -Value '0'
+    Set-RegistryString -Path 'HKCU:\Control Panel\Mouse' -Name 'MouseSpeed'       -Value '0'
+    Set-RegistryString -Path 'HKCU:\Control Panel\Mouse' -Name 'MouseThreshold1'  -Value '0'
+    Set-RegistryString -Path 'HKCU:\Control Panel\Mouse' -Name 'MouseThreshold2'  -Value '0'
 
     # Disable only the activation hotkeys; preserve the rest of the user's
     # accessibility configuration.

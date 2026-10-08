@@ -1,0 +1,55 @@
+FINAL PACKAGE AUDIT - STATIC/LINKAGE PASS - 2026-10-08
+
+PACKAGE STRUCTURE
+-----------------
+[PASS] Fresh-install launcher present and references .drivers\Run_Gaming_Drivers_v2.cmd
+[PASS] Driver syntax checker present and targets Install-Gaming-Drivers-v2-LatestOfficial.ps1
+[PASS] Driver audit launcher present and targets the same v2.3.6 installer in -Mode Audit
+[PASS] CS2 launcher references every required .scripts component
+[PASS] PostFormat launcher references Install-PostFormat-Apps.ps1
+[PASS] All CMD/BAT goto/call labels resolve
+[PASS] All custom PowerShell function definitions are unique and have call sites
+[PASS] Lightweight delimiter/string structural scan passed for every .ps1 file
+
+CURRENT VERSION / STALE-REFERENCE CHECKS
+----------------------------------------
+[PASS] Driver installer v2.3.6
+[PASS] CS2 baseline v1.0.9
+[PASS] CS2 launcher revision 14.8, including end-of-file marker
+[PASS] I226-V baseline v2.4
+[PASS] Gaming device power baseline v1.4
+[PASS] PostFormat revision 12
+[PASS] No runtime reference to v1.0.8 / PostFormat REV11 / driver v2.3.4-v2.3.5 / launcher 14.6-14.7
+
+CROSS-LAYER CHECKS
+------------------
+[PASS] Root CS2 autoexec sensitivity 0.475 / zoom 0.9 / fps_max 0
+[PASS] Root CS2 autoexec current pixel crosshair is style 4 / length 2 / gap 0 / thickness 2 / green / screen height 960
+[PASS] KovaaK Source-CS2-autoexec.cfg is byte-for-byte synced to the root Game\autoexec.cfg
+[PASS] KovaaK manifest and crosshair filename match the current root CS2 crosshair
+[PASS] KovaaK internal SHA256SUMS verifies every listed payload file
+[PASS] Device-disable restore example points to Gaming-Device-Disable-v2.ps1
+[PASS] Driver README correctly describes device-disable as a separate outer .scripts layer
+
+FRESH INSTALL / DRIVER / POLICY LINKAGE
+---------------------------------------
+[PASS] Fresh install uses D: quick format, WIM index 4, DISM apply, offline WU/PnP guard and BypassNRO
+[PASS] Fresh install copy source is normalized; no BCD/EFI mutation command is present
+[PASS] Driver layer uses six ordered steps and exact target-device validation
+[PASS] AMD chipset registered-package verification and non-blind wrapper exit handling present
+[PASS] NVIDIA graphics-only install and Microsoft Store NVIDIA Control Panel HSA path present
+[PASS] ZOWIE bundled WHQL archive hash remains pinned
+[PASS] I226 layer owns NIC power policy; device-power layer only verifies the I226 master state
+[PASS] Policy layer owns the read-only WU driver scan schedule and preserves stock scheduler/timer/memory behavior
+
+POSTFORMAT LINKAGE
+------------------
+[PASS] TeamSpeak 3.6.2 clean install path contains no /Overwolf opt-in
+[PASS] Overwolf forbidden-state cleanup/fail-closed logic present
+[PASS] FACEIT AC-only stabilization logic present
+[PASS] ExitLag remains optional/manual without aborting the rest of the chain
+[PASS] Wootility Web and Logitech OMM normal-user launch/shortcut paths present
+
+RUNTIME BOUNDARY
+----------------
+Static/package linkage is complete. This Linux-side audit cannot execute Windows PowerShell 5.1, SetupAPI/PnP, NetAdapter, AppX/winget, Windows Update COM or the actual vendor installers. On the target Windows 11 image, run the included syntax checker and driver Audit before Install; the installer and the later baseline scripts retain their own hard verification paths.

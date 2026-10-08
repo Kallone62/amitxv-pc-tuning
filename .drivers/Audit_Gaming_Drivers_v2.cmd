@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
-title Gaming Driver Installer v2.3.4 - Audit
+title Gaming Driver Installer v2.3.6 - Audit
 
 set "ROOT=%~dp0"
 set "SCRIPT=%ROOT%Install-Gaming-Drivers-v2-LatestOfficial.ps1"
@@ -25,7 +25,7 @@ if not exist "%POWERSHELL_EXE%" (
 )
 
 echo ============================================================
-echo   GAMING DRIVER INSTALLER v2.3.4 - AUDIT
+echo   GAMING DRIVER INSTALLER v2.3.6 - AUDIT
 echo ============================================================
 echo.
 echo No installer or PnP binding command will be executed.

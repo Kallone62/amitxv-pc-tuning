@@ -1,4 +1,4 @@
-﻿#requires -RunAsAdministrator
+#requires -RunAsAdministrator
 <#
 .SYNOPSIS
   Conservative gaming-only device disable layer.
@@ -46,7 +46,7 @@
   .\Gaming-Device-Disable-v2.ps1 -Mode Audit
 
 .EXAMPLE
-  .\Gaming-Device-Disable-Final.ps1 -Mode Restore
+  .\Gaming-Device-Disable-v2.ps1 -Mode Restore
 #>
 
 [CmdletBinding()]

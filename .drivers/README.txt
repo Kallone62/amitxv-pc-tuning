@@ -1,4 +1,4 @@
-GAMING DRIVER INSTALLER v2.3.4 - REVIEW BUILD
+GAMING DRIVER INSTALLER v2.3.6 - REVIEW BUILD
 =============================================
 
 This is the online post-format version.
@@ -17,23 +17,7 @@ At every run it:
    before ANY installer or PnP driver-binding command is run.
 9. Returns the elevated child's actual exit code to the CMD launcher.
 10. Install mode asserts a temporary Windows Update / PnP driver guard before precheck.
-11. The driver-specific guard is restored to its exact pre-run state after success or failure; NoAutoUpdate is intentionally retained.
-
-WINDOWS UPDATE / PNP BOOTSTRAP GUARD
-------------------------------------
-Install mode temporarily sets the documented machine-policy paths used to stop
-Windows Update from racing driver binding while the vendor packages are being
-resolved and installed:
-  - HKLM\Software\Policies\Microsoft\Windows\WindowsUpdate\ExcludeWUDriversInQualityUpdate = 1
-  - HKLM\Software\Policies\Microsoft\Windows\DriverSearching\SearchOrderConfig = 0
-  - HKLM\Software\Policies\Microsoft\Windows\DriverSearching\DontSearchWindowsUpdate = 1
-
-Before changing those three driver-specific values, the installer snapshots
-whether each value existed and its DWORD data. That snapshot is restored after
-6/6 verification, after a failed precheck/install, and on the next run if a
-previous run was interrupted before cleanup. The permanent NoAutoUpdate=1 value
-is not part of that temporary snapshot because it belongs to this machine's
-separate post-format update policy.
+11. The driver-specific guard is removed only after all six real install steps verify; NoAutoUpdate is intentionally retained.
 
 SELECTED DRIVER SOURCES
 -----------------------
@@ -133,10 +117,11 @@ NOT INSTALLED
 - AMD Adrenalin UI
 
 Not requesting these drivers does NOT guarantee they are absent or disabled:
-Windows inbox / Windows Update may install them. The separate device-disable
-policy is NOT included in this ZIP. Do not disable USB, PCIe or audio parent
-controllers by class or friendly name. Verify exact device instance IDs after
-the final reboot before any separate disable step.
+Windows inbox / Windows Update may install them. Device-disable policy is not
+part of this driver installer layer; the outer SSD Setup package carries its
+separate exact-device policy under .scripts\Gaming-Device-Disable-v2.ps1. Do not
+disable USB, PCIe or audio parent controllers by class or friendly name. Verify
+exact device instance IDs after the final reboot before any separate disable step.
 
 NO CLEAN-SWAP
 -------------
@@ -175,7 +160,7 @@ Install also repeats a complete six-step precheck in the same run, even if
 you already ran Audit separately. If any precheck fails, no driver installation
 starts. Audit continues to report the remaining steps after a step failure.
 
-The temporary driver-specific Windows Update/PnP values are snapshotted before mutation and restored to their exact pre-run state after either success or failure. A small recovery JSON is kept under C:\ProgramData\GamingDriverInstaller only while the guard is active, so a later run can recover stale state after an interrupted process. Automatic Windows Update remains disabled by design (NoAutoUpdate=1). After a successful install pass, reboot once and run the CS2 baseline launcher.
+After a successful install pass, the temporary driver-specific Windows Update/PnP guard is removed automatically, automatic Windows Update remains disabled, then reboot once and run the CS2 baseline launcher.
 
 AUDIT AND DOWNLOAD DECISIONS
 ----------------------------
@@ -227,3 +212,7 @@ Install will STOP rather than guess when (Audit continues to collect failures):
 
 This is deliberate: a post-format baseline should prefer a visible failure over
 silently installing an unknown driver.
+
+
+v2.3.6: NVIDIA DCH display driver remains Display.Driver-only; NVIDIA Control Panel is installed separately from Microsoft Store product 9NF8H0H7WMLT. NVIDIA App and HD Audio are not selected.
+
