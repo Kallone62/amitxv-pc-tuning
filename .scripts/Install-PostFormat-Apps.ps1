@@ -143,7 +143,7 @@ function Test-SteamPresent {
     if (Get-UninstallEntries | Where-Object { $_.DisplayName -eq 'Steam' -and $_.Publisher -match 'Valve' } | Select-Object -First 1) { return $true }
     return $false
 }
-
+
 
 function Get-WingetInstalledInfo([hashtable]$step, [string]$wingetPath, [switch]$WriteLog) {
     $listLog = Join-Path $logDir ('winget-check-{0:00}-{1}.txt' -f $index, $step.Id)
@@ -806,7 +806,7 @@ function Invoke-FaceitACOnly([string]$wingetPath) {
     Add-Record 'INSTALLED / VERIFIED' 'FACEIT Anti-Cheat present; separate FACEIT platform client absent after stabilization window'
 }
 
-function Invoke-SpotifyFromElevatedSession {
+function Invoke-SpotifyInstall {
     if (Test-SpotifyPresent) {
         Add-Record 'ALREADY INSTALLED' 'Spotify registry/executable detected; installer skipped'
         return
@@ -814,9 +814,37 @@ function Invoke-SpotifyFromElevatedSession {
 
     $worker = Join-Path $PSScriptRoot 'Install-Spotify-Unelevated.ps1'
     if (-not (Test-Path -LiteralPath $worker -PathType Leaf)) { throw "Spotify helper missing: $worker" }
-    $taskName = 'PostFormat-Spotify-' + [guid]::NewGuid().ToString('N')
-    $resultFile = Join-Path $logDir ($taskName + '.json')
-    $workerLog = Join-Path $logDir ($taskName + '.log')
+
+    $workerId = 'PostFormat-Spotify-' + [guid]::NewGuid().ToString('N')
+    $resultFile = Join-Path $logDir ($workerId + '.json')
+    $workerLog = Join-Path $logDir ($workerId + '.log')
+
+    $principalNow = New-Object Security.Principal.WindowsPrincipal -ArgumentList ([Security.Principal.WindowsIdentity]::GetCurrent())
+    $spotifyElevated = $principalNow.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+    if (-not $spotifyElevated) {
+        $ps = Join-Path $PSHOME 'powershell.exe'
+        $arguments = @(
+            '-NoLogo','-NoProfile','-ExecutionPolicy','Bypass',
+            '-File',$worker,
+            '-ResultFile',$resultFile,
+            '-LogFile',$workerLog
+        )
+        $proc = Start-Process -FilePath $ps -ArgumentList $arguments -Wait -PassThru -WindowStyle Normal -ErrorAction Stop
+
+        if (-not (Test-Path -LiteralPath $resultFile -PathType Leaf)) {
+            throw "Spotify worker ended without a result file. Exit=$($proc.ExitCode); log: $workerLog"
+        }
+
+        $outcome = Get-Content -LiteralPath $resultFile -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+        Remove-Item -LiteralPath $resultFile -Force -ErrorAction SilentlyContinue
+
+        if ($outcome.ExitCode -ne 0) { throw "Spotify failed in limited user session: $($outcome.Detail). Log: $workerLog" }
+        Add-Record $outcome.Status "Spotify.Spotify; $($outcome.Detail). Log: $workerLog"
+        return
+    }
+
+    $taskName = $workerId
     $taskCreated = $false
 
     try {
@@ -958,15 +986,18 @@ try {
         $principal = New-Object Security.Principal.WindowsPrincipal -ArgumentList ([Security.Principal.WindowsIdentity]::GetCurrent())
         $isElevated = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
-        if ($isElevated -and -not (Test-SpotifyPresent)) {
+        if (-not (Test-SpotifyPresent)) {
             if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot 'Install-Spotify-Unelevated.ps1') -PathType Leaf)) {
                 throw 'Spotify helper is missing from the .scripts folder. No installation steps were started.'
             }
-            if ((Get-Service -Name Schedule -ErrorAction Stop).Status -ne 'Running') {
-                throw 'Task Scheduler must be running to install Spotify from an administrator session. No installation steps were started.'
-            }
-            foreach ($command in @('New-ScheduledTaskAction', 'New-ScheduledTaskPrincipal', 'New-ScheduledTaskSettingsSet', 'Register-ScheduledTask', 'Start-ScheduledTask', 'Get-ScheduledTask', 'Get-ScheduledTaskInfo', 'Unregister-ScheduledTask')) {
-                if (-not (Get-Command $command -ErrorAction SilentlyContinue)) { throw "ScheduledTasks command missing: $command. No installation steps were started." }
+
+            if ($isElevated) {
+                if ((Get-Service -Name Schedule -ErrorAction Stop).Status -ne 'Running') {
+                    throw 'Task Scheduler must be running to install Spotify from an administrator session. No installation steps were started.'
+                }
+                foreach ($command in @('New-ScheduledTaskAction', 'New-ScheduledTaskPrincipal', 'New-ScheduledTaskSettingsSet', 'Register-ScheduledTask', 'Start-ScheduledTask', 'Get-ScheduledTask', 'Get-ScheduledTaskInfo', 'Unregister-ScheduledTask')) {
+                    if (-not (Get-Command $command -ErrorAction SilentlyContinue)) { throw "ScheduledTasks command missing: $command. No installation steps were started." }
+                }
             }
         }
     }
@@ -983,8 +1014,8 @@ try {
             $currentStep = $step.Name
             Write-Host ("Starting [$index/$($steps.Count)] $currentStep")
 
-            if ($step.Id -eq 'Spotify.Spotify' -and $isElevated) {
-                Invoke-SpotifyFromElevatedSession
+            if ($step.Id -eq 'Spotify.Spotify') {
+                Invoke-SpotifyInstall
                 continue
             }
 
@@ -1019,7 +1050,7 @@ try {
             'REV12 behavior: every automated step is checked before installation; already-present software is skipped.',
             'Every installer attempt is also followed by a presence/version verification before the script continues.',
             'Unversioned applications are install-only: REV12 does not upgrade them just because a newer version exists.',
-            'TeamSpeak remains pinned to 3.6.2 and is installed directly without the /Overwolf opt-in switch; Overwolf is forbidden by final-state verification.',
+            'TeamSpeak remains pinned to 3.6.2 and is installed directly without the /Overwolf opt-in switch; Overwolf is forbidden by final-state verification.',
             'Peripheral setup opens Wootility Web and the official Logitech Onboard Memory Manager page in the normal interactive user session and creates Start Menu URL shortcuts.',
             'Automated application failures remain fail-closed. FACEIT is enforced to an AC-only final state with a stabilization window; Overwolf and the separate FACEIT platform client are forbidden final-state bundles. ExitLag remains manual/optional.',
             'No GPU drivers, RGB tools, debug tools, CS2 tweaks, CS2 or KovaaKs are installed here.'
